@@ -8,7 +8,30 @@ export function LoginScreen(props) {
 
   const dispatch = useDispatch()
   const onLoginPressed = () => {
-    dispatch(Login(username, password));
+    //dispatch(Login(username, password));
+    postLogin("http://10.10.38.112:8000", username, password).then(data => {
+      console.log(data);
+    });
+  }
+
+  const postLogin = async (address, username, password) => {
+    let response = null;
+    let json = null;
+    try {
+      return await fetch(`${address}/login/`, {
+        method: 'POST',
+        body: JSON.stringify({"password": password, "username": username})
+      })
+      .then(res => res.text())
+      .then(result => {
+          return JSON.parse(result);
+        }
+      );
+      //console.log(json);
+    } catch (error) {
+      return null;
+      //console.error(error);
+    }
   }
 
   return (
