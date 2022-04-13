@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Image, TextInput, Button, SafeAreaView } from "react-native";
 import { useDispatch } from "react-redux";
+import { postLogin, getUsers } from "../api/apiCalls"
 
 export function LoginScreen(props) {
   const [username, setUsername] = useState('');
@@ -12,26 +13,9 @@ export function LoginScreen(props) {
     postLogin("http://10.10.38.112:8000", username, password).then(data => {
       console.log(data);
     });
-  }
-
-  const postLogin = async (address, username, password) => {
-    let response = null;
-    let json = null;
-    try {
-      return await fetch(`${address}/login/`, {
-        method: 'POST',
-        body: JSON.stringify({"password": password, "username": username})
-      })
-      .then(res => res.text())
-      .then(result => {
-          return JSON.parse(result);
-        }
-      );
-      //console.log(json);
-    } catch (error) {
-      return null;
-      //console.error(error);
-    }
+    getUsers("http://10.10.38.112:8000", username, password).then(data => {
+      console.log(data);
+    });
   }
 
   return (
