@@ -4,7 +4,7 @@ import {
     SafeAreaView
 } from 'react-native'
 import React, { useState } from 'react'
-import GlobalStyle from '../global/styles/GlobalStyles'
+
 
 import { useNavigation } from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';

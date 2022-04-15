@@ -2,7 +2,7 @@ import { View, Text,StyleSheet, SafeAreaView, FlatList } from 'react-native'
 import React, {useState, useCallback} from 'react'
 import store from '../redux/store'
 import { useFocusEffect } from '@react-navigation/native';
-import GlobalStyle from '../global/styles/GlobalStyles'
+import GlobalStyle from '../global/styles/GlobalStyles';
 import {ToggleButton} from 'react-native-paper';
 
 export default function DashboardScreen({props}) {

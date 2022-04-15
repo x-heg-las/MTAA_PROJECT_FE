@@ -34,7 +34,8 @@ export function LoginScreen({navigation}) {
       console.log(data);
     });
     */
-  }
+  });
+}
 
   return (
   
