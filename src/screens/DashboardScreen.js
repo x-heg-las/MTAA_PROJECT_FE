@@ -14,7 +14,9 @@ export default function DashboardScreen(props) {
     const [requests, setRequests] = useState([]);
     const user = useSelector(state => state.AuthReducer.userData)
 
-    
+    useEffect(() => {
+        console.log('effect calles');
+    }, [filter]);
 
     return (
         <SafeAreaView style={GlobalStyle.container}>

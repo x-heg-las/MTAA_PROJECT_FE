@@ -213,30 +213,35 @@ const getFile = async (address, username, password, params={}) => {
     }
 }
 
-const postFile = async (address, username, password, fileName, fileData) => {
-    let fileType = fileName.split(".")[-1];
-    let contentType = "image/jpeg";
-    if (fileType == "pdf") {
-        contentType = "application/pdf";
-    }
+const postFile = async (address, username, password, fileData) => {
     try {
+        const uri = fileData.uri;
+        const fileName = fileData.name;
+        const response = await fetch(uri);
+        const fileBlob = await response.blob();
+        
         return await fetch(`${address}/file/${fileName}/`, {
         method: 'POST',
         headers: {
-            "Content-type": contentType,
+            "Content-type": fileData.type,
             "username": username,
             "password": password
         },
-        body: fileData
+        body: fileBlob
         })
-        .then(res => res.text())
+        .then(res => {return res.text()})
         .then(result => {
             return JSON.parse(result);
         });
     } catch (error) {
+        
+        console.error(error);
         return null;
-        //console.error(error);
     }
+}
+
+const getTicketTypes = async () => {
+
 }
 
 export { postLogin, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
