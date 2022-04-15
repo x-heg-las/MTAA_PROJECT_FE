@@ -15,7 +15,8 @@ export const Init = () => {
                 })).then(() =>
                     dispatch ({
                         type: 'LOGIN',
-                        payload: token,
+                        username: 'meno',
+                        password: 'heslo', // TODO: zmenit !!
                     })
                 )
         } else {
@@ -35,6 +36,8 @@ export const Login = (username, password) => {
         dispatch ({
             type: 'LOGIN',
             payload: token,
+            username: username, 
+            password: password
         });
     }
 }

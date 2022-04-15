@@ -1,26 +1,40 @@
-import { View, Text, StyleSheet } from 're11act-native'
-import React from 'react'
+import { View, Text, StyleSheet } from 'react-native'
+import React, {useEffect} from 'react'
+import {Card, Title} from 'react-native-paper'
+import {TICKETS} from '../assets/dummy_data'
+import { STATUS_RESOLVED, STATUS_PENDING } from '../global/constants/Constants'
 
-export default function TicketCard({props}) {
+export function TicketCard(props) {
     
     //fetch ticket info
-
-
-    useEffect(() => {
-        //call fetch
-    })
+    const ticketData = TICKETS[0];
+    
 
     return (
-    <View style={styles.container}>
-        <Text>TicketCard</Text>
-    </View>
+        <Card style={{}}>
+            <Card.Content>
+                <View style={[styles.container]}>
+                    <View style={[styles.row]}>
+                        <Text>{ticketData.title}</Text>
+                        <Text>{new Date(ticketData.created_at).toDateString()}</Text>
+                    </View>
+                    <View  style={[styles.row]}>
+                        <Text>Author: {ticketData.user}</Text>
+                        <Text>Status: {ticketData.answered_by_user ? STATUS_RESOLVED : STATUS_PENDING}</Text>
+                    </View>
+                </View>
+            </Card.Content>
+        </Card>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    row:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         flex: 1,
-        width: '80%',
-        height: '150',
+    },
+    container:{
+        flexDirection: 'column'
     }
 })

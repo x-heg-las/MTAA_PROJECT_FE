@@ -8,10 +8,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Appbar, Menu } from 'react-native-paper';
 import  SettingsScreen  from '../screens/SettingsScreen'
 import DashboardScreen from '../screens/DashboardScreen'
-
+import TicketCreateScreen from '../screens/TicketCreateScreen';
 const Stack = createNativeStackNavigator();
 
-const NavigationBar = ({navigation, back}) => {
+const NavigationBar = ({user, navigation, back}) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const openMenu = () => setMenuVisible(true); 
     const closeMenu = () => setMenuVisible(false);
@@ -24,7 +24,7 @@ const NavigationBar = ({navigation, back}) => {
     return(
         <Appbar.Header>
             {back ? <Appbar.BackAction onPress={navigation.goBack}/> : null}
-            <Appbar.Content title="Tech Support"/>
+            { user? <Appbar.Content></Appbar.Content> : <Appbar.Content title="Tech Support"/>}
             <Menu 
                 visible={menuVisible}
                 onDismiss={closeMenu}
@@ -59,9 +59,19 @@ export const AuthStack = (props) => {
 }
 
 export const AppStack = (props) => {
+
+    const userData = null;
+
     return(
-        <Stack.Navigator>
+        <Stack.Navigator
+            initialRouteName="Dashboard"
+            screenOptions={{
+                header: (props) => <NavigationBar user={userData} {...props}/>,
+            }}
+        >
             <Stack.Screen name="Dashboard" component={DashboardScreen}/>
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
         </Stack.Navigator>
     )
 }
