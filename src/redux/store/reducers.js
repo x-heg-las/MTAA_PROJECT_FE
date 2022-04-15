@@ -1,10 +1,13 @@
 const initialState = {
-    authToken: 4,
+    authToken: null,
     userData: {},
 }
 
+const initialServerState = {
+    address: "0.0.0.0",
+}
 
-export default (state = initialState, action) => {
+export const AuthReducer = (state = initialState, action) => {
     switch (action.type) {
         case 'LOGIN':
             return {
@@ -18,5 +21,16 @@ export default (state = initialState, action) => {
         default: 
             return state;
 
+    }
+}
+
+export const SettingsReducer = (state = initialServerState, action) => {
+    switch (action.type) {
+        case 'SET_ADDR':
+            return {
+                address: action.payload
+            }
+        default:
+            return state;
     }
 }
