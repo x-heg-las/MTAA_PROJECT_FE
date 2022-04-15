@@ -1,15 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Image, TextInput, Button, SafeAreaView } from "react-native";
-import { useDispatch } from "react-redux";
+
+import { useDispatch, useSelector } from "react-redux";
+import { postLogin, getUsers } from "../api/apiCalls"
+import { Init, Login } from "../redux/store/actions"
 import * as api from "../api/apiCalls"
 
-export function LoginScreen(props) {
+
+export function LoginScreen({navigation}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const dispatch = useDispatch()  
+  const serverAddress = useSelector(state => state.SettingsReducer.address);
+  
+  useEffect(() => {
+    dispatch(Init());
+  }, [])
 
-  const dispatch = useDispatch()
-  const onLoginPressed = () => {
+  const onLoginPressed = async () => {
     //dispatch(Login(username, password));
+
+    postLogin(serverAddress, username, password).then(data => {
+      console.log(data);
+      if(data !== null) {
+        dispatch(Login(username, password));
+
+      }
+    });
+    getUsers(serverAddress, username, password).then(data => {
+
     /*
     api.putUsers("http://192.168.1.21:8000", username, password, {id: 6, phone_number: "000"}).then(data => {
       console.log(data);

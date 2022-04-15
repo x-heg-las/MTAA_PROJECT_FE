@@ -1,13 +1,30 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 export const Init = () => {
-     
+    
     return async dispatch => {
         console.log("init fetching..."); 
         const token = "toktok";
-   
-        dispatch ({
-            type: 'LOGIN',
-            payload: token,
-        });
+        let serverAddress = await AsyncStorage.getItem('server_address');
+        if(serverAddress) {
+            console.log(serverAddress);
+            Promise.resolve(
+                dispatch({
+                    type: 'SET_ADDR',
+                    payload: serverAddress,
+                })).then(() =>
+                    dispatch ({
+                        type: 'LOGIN',
+                        payload: token,
+                    })
+                )
+        } else {
+
+            dispatch ({
+                type: 'LOGIN',
+                payload: null,
+            });
+        }
     }
 }
 
@@ -27,4 +44,15 @@ export const Logout = () => {
         type: 'LOGOUT',
         payload: null,
     })
+}
+
+export const RegisterServer = (address) => {
+    return async dispatch => {
+        console.log("saving address");
+        await AsyncStorage.setItem('server_address', address);
+        dispatch({
+            type: 'SET_ADDR',
+            payload: address,
+        });
+    }
 }
