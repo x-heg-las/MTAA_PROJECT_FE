@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, Image, TextInput, Button, SafeAreaView } from "react-native";
 import { useDispatch } from "react-redux";
-import { postLogin, getUsers } from "../api/apiCalls"
+import * as api from "../api/apiCalls"
 
 export function LoginScreen(props) {
   const [username, setUsername] = useState('');
@@ -10,12 +10,11 @@ export function LoginScreen(props) {
   const dispatch = useDispatch()
   const onLoginPressed = () => {
     //dispatch(Login(username, password));
-    postLogin("http://10.10.38.112:8000", username, password).then(data => {
+    /*
+    api.putUsers("http://192.168.1.21:8000", username, password, {id: 6, phone_number: "000"}).then(data => {
       console.log(data);
     });
-    getUsers("http://10.10.38.112:8000", username, password).then(data => {
-      console.log(data);
-    });
+    */
   }
 
   return (
