@@ -18,7 +18,7 @@ import { postFile, postTickets } from '../api/apiCalls';
 import { SettingsReducer } from '../redux/store/reducers';
 
 
-export default function TicketCreateScreen() {
+export default function TicketCreateScreen(props) {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('');
     const [description, setDescription] = useState('');
@@ -82,7 +82,8 @@ export default function TicketCreateScreen() {
 
         postTickets(serverAddress, userData.username, userData.password, data).then(response => {
             console.log(response);
-            navigation.goBack();
+            props.navigation.goBack();
+            props.route.params.onCreateTicket({created: true});
         }).catch(err => {
             console.error(err);
         });

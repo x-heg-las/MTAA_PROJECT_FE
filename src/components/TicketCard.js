@@ -4,11 +4,9 @@ import {Card, Title} from 'react-native-paper'
 import {TICKETS} from '../assets/dummy_data'
 import { STATUS_RESOLVED, STATUS_PENDING } from '../global/constants/Constants'
 
-export function TicketCard(props) {
+export function TicketCard({ticketData}) {
     
-    //fetch ticket info
-    const ticketData = TICKETS[0];
-    
+    console.log("tick tick" + ticketData); 
 
     return (
         <Card style={{}}>

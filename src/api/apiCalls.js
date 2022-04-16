@@ -36,7 +36,7 @@ const getUsers = async (address, username, password, params={}) => {
             "password": password
         }
         })
-        .then(res => res.text())
+        .then(res => {console.log("Call" + res) ;return res.text()})
         .then(result => {
             return JSON.parse(result);
         }
@@ -49,28 +49,34 @@ const getUsers = async (address, username, password, params={}) => {
 
 const getTickets = async (address, username, password, params={}) => {
     try {
+        console.log(`${address}/tickets/${constructParams(params)}`);
         return await fetch(`${address}/tickets/${constructParams(params)}`, {
-        method: 'GET',
-        headers: {
-            "username": username,
-            "password": password
-        }
+            method: 'GET',
+            headers: {
+                "username": username,
+                "password": password
+            }
         })
-        .then(res => res.text())
-        .then(result => {
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
 const putUsers = async (address, username, password, params) => {
-    let params_copy = JSON.parse(JSON.stringify(params));
-    delete params_copy.id;
     try {
+        let params_copy = JSON.parse(JSON.stringify(params));
+        delete params_copy.id;
         return await fetch(`${address}/users/?id=${params.id}`, {
         method: 'PUT',
         headers: {
@@ -86,8 +92,8 @@ const putUsers = async (address, username, password, params) => {
         }
         );
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 

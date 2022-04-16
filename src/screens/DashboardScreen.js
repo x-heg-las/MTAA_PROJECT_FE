@@ -3,7 +3,7 @@ import React, {useState,useEffect, useCallback} from 'react'
 import store from '../redux/store'
 import { useFocusEffect } from '@react-navigation/native';
 import GlobalStyle from '../global/styles/GlobalStyles';
-import {FAB, ToggleButton, ActivityIndicator, Colors} from 'react-native-paper';
+import {FAB, ToggleButton, ActivityIndicator, Colors, Snackbar} from 'react-native-paper';
 import {TicketCard} from '../components/TicketCard';
 import {useSelector} from 'react-redux';
 
@@ -12,11 +12,16 @@ export default function DashboardScreen(props) {
     //const user = store.getState();
     const [filter, setFilter] = useState('pending');
     const [requests, setRequests] = useState([]);
+    const [visible, setVisible] = useState(false);
     const user = useSelector(state => state.AuthReducer.userData)
 
     useEffect(() => {
         console.log('effect calles');
     }, [filter]);
+
+    const onCreateTicket = data => {
+        setVisible(data.created)
+    }
 
     return (
         <SafeAreaView style={GlobalStyle.container}>
@@ -44,7 +49,7 @@ export default function DashboardScreen(props) {
 
                 <View>
                     <FlatList
-                        data={[20,1,1,1,1,1,1,1,1,1,1,,1,1,1,1,1]}
+                        data={[]}
                         renderItem={TicketCard}
                     />
                 </View>
@@ -52,8 +57,14 @@ export default function DashboardScreen(props) {
             <FAB
                 style={styles.fab}
                 icon="plus"
-                onPress={() => {props.navigation.push("New Ticket")}}
+                onPress={() => {props.navigation.navigate("New Ticket", { onCreateTicket: onCreateTicket})}}
             />
+            <Snackbar 
+                visible={visible}
+                onDismiss={() => setVisible(false)}    
+            >
+                Ticket created
+            </Snackbar>
         </SafeAreaView>
     )
 }

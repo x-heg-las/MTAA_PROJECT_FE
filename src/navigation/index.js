@@ -7,6 +7,7 @@ import { Init } from '../redux/store/actions'
 import { useDispatch, useSelector } from 'react-redux';
 import { Appbar, Menu } from 'react-native-paper';
 import  SettingsScreen  from '../screens/SettingsScreen'
+import ProfileScreen from '../screens/ProfileScreen';
 import DashboardScreen from '../screens/DashboardScreen'
 import TicketCreateScreen from '../screens/TicketCreateScreen';
 const Stack = createNativeStackNavigator();
@@ -15,12 +16,13 @@ const NavigationBar = ({user, navigation, back}) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const openMenu = () => setMenuVisible(true); 
     const closeMenu = () => setMenuVisible(false);
-  
+    const userData = useSelector(state => state.AuthReducer.userData);
     
     useEffect(() => {
         return closeMenu();    
     }, []);
 
+ 
     return(
         <Appbar.Header>
             {back ? <Appbar.BackAction onPress={navigation.goBack}/> : null}
@@ -33,6 +35,22 @@ const NavigationBar = ({user, navigation, back}) => {
                 }
             >
             <View style={{ flex: 1 }}>
+                {
+                    userData && 
+                    <View>
+                        <Menu.Item title="Profile" onPress={() => { 
+                            navigation.navigate("Profile");
+                            closeMenu();
+                        }}/>
+                        <Menu.Item title="My organisation"/> 
+                    </View>
+                }
+                {
+                    (userData && userData.user_type__name === 'admin') &&
+                    <View>
+                        <Menu.Item title="Add user"/>
+                    </View>
+                }
                 <Menu.Item onPress={() => {
                     navigation.push("Settings");
                     closeMenu();
@@ -72,6 +90,7 @@ export const AppStack = (props) => {
             <Stack.Screen name="Dashboard" component={DashboardScreen}/>
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
         </Stack.Navigator>
     )
 }
