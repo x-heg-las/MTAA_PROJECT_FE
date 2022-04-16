@@ -7,24 +7,27 @@ import { Init } from '../redux/store/actions'
 import { useDispatch, useSelector } from 'react-redux';
 import { Appbar, Menu } from 'react-native-paper';
 import  SettingsScreen  from '../screens/SettingsScreen'
-import DashboardScreen from '../screens/DashboardScreen'
-
+import ProfileScreen from '../screens/ProfileScreen';
+import DashboardScreen from '../screens/DashboardScreen';
+import UserCreateScreen from '../screens/UserCreateScreen';
+import TicketCreateScreen from '../screens/TicketCreateScreen';
 const Stack = createNativeStackNavigator();
 
-const NavigationBar = ({navigation, back}) => {
+const NavigationBar = ({user, navigation, back}) => {
     const [menuVisible, setMenuVisible] = useState(false);
     const openMenu = () => setMenuVisible(true); 
     const closeMenu = () => setMenuVisible(false);
-  
+    const userData = useSelector(state => state.AuthReducer.userData);
     
     useEffect(() => {
         return closeMenu();    
     }, []);
 
+ 
     return(
         <Appbar.Header>
             {back ? <Appbar.BackAction onPress={navigation.goBack}/> : null}
-            <Appbar.Content title="Tech Support"/>
+            { user? <Appbar.Content></Appbar.Content> : <Appbar.Content title="Tech Support"/>}
             <Menu 
                 visible={menuVisible}
                 onDismiss={closeMenu}
@@ -33,6 +36,22 @@ const NavigationBar = ({navigation, back}) => {
                 }
             >
             <View style={{ flex: 1 }}>
+                {
+                    userData && 
+                    <View>
+                        <Menu.Item title="Profile" onPress={() => { 
+                            navigation.navigate("Profile");
+                            closeMenu();
+                        }}/>
+                        <Menu.Item title="My organisation"/> 
+                    </View>
+                }
+                {
+                    (userData && userData.user_type__name === 'admin') &&
+                    <View>
+                        <Menu.Item onPress={() => {navigation.navigate("New User")}} title="Add user"/>
+                    </View>
+                }
                 <Menu.Item onPress={() => {
                     navigation.push("Settings");
                     closeMenu();
@@ -59,9 +78,21 @@ export const AuthStack = (props) => {
 }
 
 export const AppStack = (props) => {
+
+    const userData = null;
+
     return(
-        <Stack.Navigator>
+        <Stack.Navigator
+            initialRouteName="Dashboard"
+            screenOptions={{
+                header: (props) => <NavigationBar user={userData} {...props}/>,
+            }}
+        >
             <Stack.Screen name="Dashboard" component={DashboardScreen}/>
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="New User" component={UserCreateScreen} />
         </Stack.Navigator>
     )
 }

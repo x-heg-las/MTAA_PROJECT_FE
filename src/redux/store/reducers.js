@@ -1,6 +1,6 @@
 const initialState = {
     authToken: null,
-    userData: {},
+    userData: null,
 }
 
 const initialServerState = {
@@ -13,6 +13,7 @@ export const AuthReducer = (state = initialState, action) => {
             return {
                 ...state, //copies all data
                 authToken: action.payload,
+                userData: action.userData
             }
         case 'LOGOUT':
             return {

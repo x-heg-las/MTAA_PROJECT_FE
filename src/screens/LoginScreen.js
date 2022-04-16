@@ -20,10 +20,10 @@ export function LoginScreen({navigation}) {
   const onLoginPressed = async () => {
     //dispatch(Login(username, password));
 
-    postLogin(serverAddress, username, password).then(data => {
-      console.log(data);
-      if(data !== null) {
-        dispatch(Login(username, password));
+    postLogin(serverAddress, username, password).then(response => {
+      console.log(response);
+      if(response !== null) {
+        dispatch(Login(response, password));
 
       }
     });
