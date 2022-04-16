@@ -134,12 +134,13 @@ const postUsers = async (address, username, password, params) => {
         })
         .then(res => res.text())
         .then(result => {
+            console.log(result)
             return JSON.parse(result);
         }
         );
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
@@ -250,4 +251,28 @@ const getTicketTypes = async () => {
 
 }
 
-export { postLogin, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+const getUserTypes = async (address, username, password) => {
+    try {
+        console.log(username, password);
+        return await fetch(`${address}/usertypes/`, {
+            method: 'GET',
+            headers: {
+                "username": username,
+                "password": password,
+            },
+        })
+        .then(result => {return Promise.all([result.status, result.text()])})
+        .then(result => {
+            const response = JSON.parse(result[1]);
+            return {
+                status: result[0],
+                body: response
+            }
+        })
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+export { getUserTypes, postLogin, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };

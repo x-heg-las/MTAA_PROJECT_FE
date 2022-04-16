@@ -8,7 +8,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Appbar, Menu } from 'react-native-paper';
 import  SettingsScreen  from '../screens/SettingsScreen'
 import ProfileScreen from '../screens/ProfileScreen';
-import DashboardScreen from '../screens/DashboardScreen'
+import DashboardScreen from '../screens/DashboardScreen';
+import UserCreateScreen from '../screens/UserCreateScreen';
 import TicketCreateScreen from '../screens/TicketCreateScreen';
 const Stack = createNativeStackNavigator();
 
@@ -48,7 +49,7 @@ const NavigationBar = ({user, navigation, back}) => {
                 {
                     (userData && userData.user_type__name === 'admin') &&
                     <View>
-                        <Menu.Item title="Add user"/>
+                        <Menu.Item onPress={() => {navigation.navigate("New User")}} title="Add user"/>
                     </View>
                 }
                 <Menu.Item onPress={() => {
@@ -91,6 +92,7 @@ export const AppStack = (props) => {
             <Stack.Screen name="Settings" component={SettingsScreen} />
             <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
+            <Stack.Screen name="New User" component={UserCreateScreen} />
         </Stack.Navigator>
     )
 }
