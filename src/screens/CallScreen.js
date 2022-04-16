@@ -64,8 +64,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: 100,
         height: 160,
-        top: 5,
-        right: 20,
+        alignSelf: 'center',
+        zIndex:2,
+        right: 100,
+        bottom: 150,
         elevation: 10,
     },
     InnerVideo:{

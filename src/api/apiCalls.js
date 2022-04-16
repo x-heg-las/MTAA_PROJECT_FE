@@ -22,8 +22,9 @@ const postLogin = async (address, username, password) => {
         }
         );
     } catch (error) {
+        
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 

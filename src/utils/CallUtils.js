@@ -1,6 +1,6 @@
 import {mediaDevices} from 'react-native-webrtc';
 
-export default class CallUtils {
+export class CallUtils {
     static async getStream() {
         let isFront = true;
         const sourceInfos = await mediaDevices.enumerateDevices()
@@ -15,11 +15,11 @@ export default class CallUtils {
         const stream = await mediaDevices.getUserMedia({
             audio: true,
             video: {
-            width: 640,
-            height: 480,
-            frameRate: 30,
-            facingMode: (isFront ? "user" : "environment"),
-            deviceId: videoSourceId
+                width: 640,
+                height: 480,
+                frameRate: 30,
+                facingMode: (isFront ? "user" : "environment"),
+                deviceId: videoSourceId
             }
         });
         if(typeof stream !== "boolean") {
