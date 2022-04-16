@@ -14,14 +14,14 @@ export function LoginScreen({navigation}) {
   const serverAddress = useSelector(state => state.SettingsReducer.address);
   
   useEffect(() => {
-    dispatch(Init());
+    //dispatch(Init());
   }, [])
 
   const onLoginPressed = async () => {
     //dispatch(Login(username, password));
 
     postLogin(serverAddress, username, password).then(response => {
-      console.log(response);
+      console.log("Response " + response);
       if(response !== null) {
         dispatch(Login(response, password));
 
