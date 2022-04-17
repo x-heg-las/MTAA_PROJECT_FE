@@ -112,7 +112,7 @@ const getUsers = async (address, params={}) => {
     }
 }
 
-const getTickets = async (address, username, password, params={}) => {
+const getTickets = async (address, params={}) => {
     try {
         let accessToken = await AsyncStorage.getItem("accessToken");
         console.log(`${address}/tickets/${constructParams(params)}`);
@@ -158,16 +158,16 @@ const getTickets = async (address, username, password, params={}) => {
     }
 }
 
-const putUsers = async (address, username, password, params) => {
+const putUsers = async (address, params) => {
     try {
+        let accessToken = await AsyncStorage.getItem("accessToken");
         let params_copy = JSON.parse(JSON.stringify(params));
         delete params_copy.id;
-        return await fetch(`${address}/users/?id=${params.id}`, {
+        let fetchResponse = await fetch(`${address}/users/?id=${params.id}`, {
         method: 'PUT',
         headers: {
             "Content-Type": "application/json",
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         },
         body: JSON.stringify(params_copy)
         })
@@ -181,22 +181,44 @@ const putUsers = async (address, username, password, params) => {
             }
         }
         );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/users/?id=${params.id}`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(params_copy)
+                })
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+                );
+        }
+        return fetchResponse;
     } catch (error) {
         console.error(error);
         return null;
     }
 }
 
-const putTickets = async (address, username, password, params) => {
+const putTickets = async (address, params) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     let params_copy = JSON.parse(JSON.stringify(params));
     delete params_copy.id;
     try {
-        return await fetch(`${address}/tickets/?id=${params.id}`, {
+        let fetchResponse = await fetch(`${address}/tickets/?id=${params.id}`, {
         method: 'PUT',
         headers: {
             "Content-Type": "application/json",
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         },
         body: JSON.stringify(params_copy)
         })
@@ -210,47 +232,42 @@ const putTickets = async (address, username, password, params) => {
             }
         }
         );
-    } catch (error) {
-        return null;
-        //console.error(error);
-    }
-}
-
-const postUsers = async (address, username, password, params) => {
-    try {
-        return await fetch(`${address}/users/`, {
-        method: 'POST',
-        headers: {
-            "Content-Type": "application/json",
-            "username": username,
-            "password": password
-        },
-        body: JSON.stringify(params)
-        })
-        .then((res) => {return Promise.all([res.status, res.text()])})
-        .then((result) => {
-            const response = JSON.parse(result[1]);
-            console.log(response);
-            return {
-                status: result[0],
-                body: response
-            }
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/tickets/?id=${params.id}`, {
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(params_copy)
+                })
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+                );
         }
-        );
+        return fetchResponse;
     } catch (error) {
         console.error(error);
         return null;
     }
 }
 
-const postTickets = async (address, username, password, params) => {
+const postUsers = async (address, params) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        return await fetch(`${address}/tickets/`, {
+        let fetchResponse = await fetch(`${address}/users/`, {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         },
         body: JSON.stringify(params)
         })
@@ -264,79 +281,190 @@ const postTickets = async (address, username, password, params) => {
             }
         }
         );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/users/`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`
+                },
+                body: JSON.stringify(params)
+                })
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+                );
+        }
+        return fetchResponse;
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
-const deleteUsers = async (address, username, password, params) => {
+const postTickets = async (address, params) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        return await fetch(`${address}/users/?id=${params.id}`, {
+        let fetchResponse = await fetch(`${address}/tickets/`, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(params)
+        })
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
+        }
+        );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/tickets/`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`,
+                    "username": username,
+                    "password": password
+                },
+                body: JSON.stringify(params)
+                })
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+                );
+        }
+        return fetchResponse;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+const deleteUsers = async (address, params) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
+    try {
+        let fetchResponse = await fetch(`${address}/users/?id=${params.id}`, {
         method: 'DELETE',
         headers: {
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         }
         })
         .then(res => {
             return res.status;
         });
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/users/?id=${params.id}`, {
+                method: 'DELETE',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+                })
+                .then(res => {
+                    return {status: res.status};
+                });
+        }
+        return fetchResponse;
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
-const deleteTickets = async (address, username, password, params) => {
+const deleteTickets = async (address, params) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        return await fetch(`${address}/tickets/?id=${params.id}`, {
+        let fetchResponse = await fetch(`${address}/tickets/?id=${params.id}`, {
         method: 'DELETE',
         headers: {
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         }
         })
         .then(res => {
             return res.status;
         });
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/tickets/?id=${params.id}`, {
+                method: 'DELETE',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+                })
+                .then(res => {
+                    return {status: res.status};
+                });
+        }
+        return fetchResponse;
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
-const getFile = async (address, username, password, params={}) => {
+const getFile = async (address, params={}) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        return await fetch(`${address}/file/${constructParams(params)}`, {
+        let fetchResponse = await fetch(`${address}/file/${constructParams(params)}`, {
         method: 'GET',
         headers: {
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         }
         })
         .then(res => {
             return res.blob();
         });
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/file/${constructParams(params)}`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+                })
+                .then(res => {
+                    return res.blob();
+                });
+        }
+        return fetchResponse;
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
-const postFile = async (address, username, password, fileData) => {
+const postFile = async (address, fileData) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     try {
         const uri = fileData.uri;
         const fileName = fileData.name;
         const response = await fetch(uri);
         const fileBlob = await response.blob();
-        
-        return await fetch(`${address}/file/${fileName}/`, {
+        let fetchResponse = await fetch(`${address}/file/${fileName}/`, {
         method: 'POST',
         headers: {
             "Content-type": fileData.type,
-            "username": username,
-            "password": password
+            "Authorization": `Bearer ${accessToken}`
         },
         body: fileBlob
         })
@@ -344,25 +472,35 @@ const postFile = async (address, username, password, fileData) => {
         .then(result => {
             return JSON.parse(result);
         });
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/file/${fileName}/`, {
+                method: 'POST',
+                headers: {
+                    "Content-type": fileData.type,
+                    "Authorization": `Bearer ${accessToken}`
+                },
+                body: fileBlob
+                })
+                .then(res => {return res.text()})
+                .then(result => {
+                    return JSON.parse(result);
+                });
+        }
+        return fetchResponse;
     } catch (error) {
-        
         console.error(error);
         return null;
     }
 }
 
-const getTicketTypes = async () => {
-
-}
-
-const getUserTypes = async (address, username, password) => {
+const getTicketTypes = async (address) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        console.log(username, password);
-        return await fetch(`${address}/usertypes/`, {
+        let fetchResponse = await fetch(`${address}/requesttype/`, {
             method: 'GET',
             headers: {
-                "username": username,
-                "password": password,
+                "Authorization": `Bearer ${accessToken}`
             },
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
@@ -375,10 +513,120 @@ const getUserTypes = async (address, username, password) => {
             }
         }
         );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/requesttype/`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                },
+            })
+            .then((res) => {return Promise.all([res.status, res.text()])})
+            .then((result) => {
+                const response = JSON.parse(result[1]);
+                console.log(response);
+                return {
+                    status: result[0],
+                    body: response
+                }
+            }
+            );
+        }
+        return fetchResponse;
     } catch (err) {
         console.error(err);
         return null;
     }
 }
 
-export { getTokens, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+const getFileTypes = async (address) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
+    try {
+        let fetchResponse = await fetch(`${address}/filetype/`, {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            },
+        })
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
+        }
+        );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/filetype/`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                },
+            })
+            .then((res) => {return Promise.all([res.status, res.text()])})
+            .then((result) => {
+                const response = JSON.parse(result[1]);
+                console.log(response);
+                return {
+                    status: result[0],
+                    body: response
+                }
+            }
+            );
+        }
+        return fetchResponse;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+const getUserTypes = async (address) => {
+    let accessToken = await AsyncStorage.getItem("accessToken");
+    try {
+        let fetchResponse = await fetch(`${address}/usertypes/`, {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            },
+        })
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
+        }
+        );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/usertypes/`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                },
+            })
+            .then((res) => {return Promise.all([res.status, res.text()])})
+            .then((result) => {
+                const response = JSON.parse(result[1]);
+                console.log(response);
+                return {
+                    status: result[0],
+                    body: response
+                }
+            }
+            );
+        }
+        return fetchResponse;
+    } catch (err) {
+        console.error(err);
+        return null;
+    }
+}
+
+export { getTokens, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
