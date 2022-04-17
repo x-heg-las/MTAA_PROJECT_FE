@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 function constructParams(params) {
     if (Object.keys(params).length === 0) {
         return "";
@@ -10,51 +12,114 @@ function constructParams(params) {
     return url;
 }
 
-const postLogin = async (address, username, password) => {
+const getTokens = async (address, username, password) => {
     try {
-        return await fetch(`${address}/login/`, {
+        return await fetch(`${address}/api/token/`, {
         method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({"password": password, "username": username})
         })
-        .then(res => res.text())
-        .then(result => {
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            if (result[0] === 200) {
+                AsyncStorage.setItem("accessToken", response.access);
+                AsyncStorage.setItem("refreshToken", response.refresh);
+            }
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
     }
 }
 
-const getUsers = async (address, username, password, params={}) => {
+const refreshToken = async (address) => {
     try {
-        return await fetch(`${address}/users/${constructParams(params)}`, {
-        method: 'GET',
-        headers: {
-            "username": username,
-            "password": password
-        }
+        let refToken = await AsyncStorage.getItem("refreshToken");
+        return await fetch(`${address}/api/token/refresh/`, {
+        method: 'POST',
+        body: JSON.stringify({"refresh": refToken})
         })
-        .then(res => {console.log("Call" + res) ;return res.text()})
-        .then(result => {
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log("Refreshing Token...");
+            if (result[0] === 200) {
+                AsyncStorage.setItem("accessToken", response.access);
+            }
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
+        console.error(error);
         return null;
-        //console.error(error);
+    }
+}
+
+const getUsers = async (address, params={}) => {
+    try {
+        let accessToken = await AsyncStorage.getItem("accessToken");
+        let fetchResponse = await fetch(`${address}/users/${constructParams(params)}`, {
+        method: 'GET',
+        headers: {
+            "Authorization": `Bearer ${accessToken}`
+        }
+        })
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
+        }
+        );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/users/${constructParams(params)}`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+                })
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+            );
+        }
+        return fetchResponse;
+    } catch (error) {
+        console.error(error);
+        return null;
     }
 }
 
 const getTickets = async (address, username, password, params={}) => {
     try {
+        let accessToken = await AsyncStorage.getItem("accessToken");
         console.log(`${address}/tickets/${constructParams(params)}`);
-        return await fetch(`${address}/tickets/${constructParams(params)}`, {
+        let fetchResponse = await fetch(`${address}/tickets/${constructParams(params)}`, {
             method: 'GET',
             headers: {
-                "username": username,
-                "password": password
+                "Authorization": `Bearer ${accessToken}`
             }
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
@@ -67,6 +132,26 @@ const getTickets = async (address, username, password, params={}) => {
             }
         }
         );
+        if (fetchResponse.status === 401) {
+            accessToken = (await refreshToken(address)).body.access;
+            fetchResponse = await fetch(`${address}/tickets/${constructParams(params)}`, {
+                method: 'GET',
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                }
+            })
+            .then((res) => {return Promise.all([res.status, res.text()])})
+            .then((result) => {
+                const response = JSON.parse(result[1]);
+                console.log(response);
+                return {
+                    status: result[0],
+                    body: response
+                }
+            }
+            );
+        }
+        return fetchResponse;
     } catch (error) {
         console.error(error);
         return null;
@@ -86,9 +171,14 @@ const putUsers = async (address, username, password, params) => {
         },
         body: JSON.stringify(params_copy)
         })
-        .then(res => res.text())
-        .then(result => {
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
@@ -110,9 +200,14 @@ const putTickets = async (address, username, password, params) => {
         },
         body: JSON.stringify(params_copy)
         })
-        .then(res => res.text())
-        .then(result => {
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
@@ -132,10 +227,14 @@ const postUsers = async (address, username, password, params) => {
         },
         body: JSON.stringify(params)
         })
-        .then(res => res.text())
-        .then(result => {
-            console.log(result)
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
@@ -155,9 +254,14 @@ const postTickets = async (address, username, password, params) => {
         },
         body: JSON.stringify(params)
         })
-        .then(res => res.text())
-        .then(result => {
-            return JSON.parse(result);
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
+            const response = JSON.parse(result[1]);
+            console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
         }
         );
     } catch (error) {
@@ -261,18 +365,20 @@ const getUserTypes = async (address, username, password) => {
                 "password": password,
             },
         })
-        .then(result => {return Promise.all([result.status, result.text()])})
-        .then(result => {
+        .then((res) => {return Promise.all([res.status, res.text()])})
+        .then((result) => {
             const response = JSON.parse(result[1]);
+            console.log(response);
             return {
                 status: result[0],
                 body: response
             }
-        })
+        }
+        );
     } catch (err) {
         console.error(err);
         return null;
     }
 }
 
-export { getUserTypes, postLogin, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+export { getTokens, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
