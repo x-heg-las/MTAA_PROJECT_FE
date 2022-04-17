@@ -32,7 +32,7 @@ export const CallScreen = (props) => {
         return(
             <View style={styles.container}>
                 <RTCView streamURL={props.remoteStream.toURL()} objectFit={'cover'} style={styles.video}/>
-                <RTCView streamURL={props.localStream.toURL()} objectFit={'cover'} style={styles.localVideo}/>
+                <RTCView zOrder={1} streamURL={props.localStream.toURL()} objectFit={'cover'} style={styles.localVideo}/>
                 <Controls hangup={props.hangup}/>
             </View>
         )
@@ -66,8 +66,8 @@ const styles = StyleSheet.create({
         height: 160,
         alignSelf: 'center',
         zIndex:2,
-        right: 100,
-        bottom: 150,
+        right: 10,
+        top: 15,
         elevation: 10,
     },
     InnerVideo:{

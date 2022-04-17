@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Image, TextInput, Button, SafeAreaView } from "react-native";
-
+import { StyleSheet, View, Image, TextInput, SafeAreaView } from "react-native";
+import { Button, Snackbar } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { postLogin, getUsers } from "../api/apiCalls"
 import { Init, Login } from "../redux/store/actions"
@@ -10,6 +10,8 @@ import * as api from "../api/apiCalls"
 export function LoginScreen({navigation}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [showWarning, setShowWarning] = useState(false);
   const dispatch = useDispatch()  
   const serverAddress = useSelector(state => state.SettingsReducer.address);
   
@@ -52,10 +54,16 @@ export function LoginScreen({navigation}) {
             onChangeText={(text) => {setPassword(text)}}
           ></TextInput>
           <Button
-            title="LOGIN"
+            mode='contained'
             style={styles.button}
             onPress={onLoginPressed}
-          ></Button>
+          >LOGIN</Button>
+          <Snackbar
+            visible={showWarning}
+            onDismiss={() => {setShowWarning(false)}}
+            >
+            {message}
+            </Snackbar>
         </View>
   );
 }
@@ -83,7 +91,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: '80%',
     borderRadius: 85,
-    backgroundColor: "#000000",
+    backgroundColor: "green",
   }
 });
 

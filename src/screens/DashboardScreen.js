@@ -1,4 +1,4 @@
-import { View, Text,StyleSheet, SafeAreaView, FlatList } from 'react-native'
+import { View, Text,StyleSheet, SafeAreaView, FlatList, Modal } from 'react-native'
 import React, {useState,useEffect, useCallback} from 'react'
 import store from '../redux/store'
 import { useFocusEffect } from '@react-navigation/native';
@@ -15,8 +15,16 @@ export default function DashboardScreen(props) {
     const [visible, setVisible] = useState(false);
     const user = useSelector(state => state.AuthReducer.userData)
 
+    const fetchData = () => {
+
+
+
+    }
+    
+    
     useEffect(() => {
         console.log('effect calles');
+        fetchData();
     }, [filter]);
 
     const onCreateTicket = data => {

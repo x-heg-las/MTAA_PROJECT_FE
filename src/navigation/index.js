@@ -222,7 +222,7 @@ export const AppStack = (props) => {
     }
 
     const create = async (chatId = 'chatId') => {
-        if (chatId === null) { return }
+        if (chatId === null || chatId === userData.username) { return }
 
         console.log("Calling ");
         connecting.current = true;
@@ -375,8 +375,12 @@ export const AppStack = (props) => {
 
     return(
         <>
-            <Button onPress={() => create(peer)}>calll</Button>
-                <TextInput title="peer" onChangeText={setPeer}></TextInput>
+            {  false && // for testing purpose
+                <>
+                    <Button onPress={() => create(peer)}>calll</Button>
+                    <TextInput title="peer" onChangeText={setPeer}></TextInput>
+                </>
+            }
             <Stack.Navigator
                 initialRouteName="Dashboard"
                 screenOptions={{

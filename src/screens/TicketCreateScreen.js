@@ -20,14 +20,14 @@ import { SettingsReducer } from '../redux/store/reducers';
 
 export default function TicketCreateScreen(props) {
     const [title, setTitle] = useState('');
-    const [category, setCategory] = useState('');
+    const [category, setCategory] = useState();
     const [description, setDescription] = useState('');
+    const [categories, setCategories] = useState( [{id:1, name:'Technical'}]);
     const [callRequested, setCallRequested] = useState(false);
     const [file, setFile] = useState(null);
     const serverAddress =  useSelector(state => state.SettingsReducer.address);
     const userData =  useSelector(state => state.AuthReducer.userData);   
 
-    const categories = [{id:1, name:'Technical'}];
 
     const handleError = (err) => {
         if (DocumentPicker.isCancel(err)) {
@@ -94,28 +94,35 @@ export default function TicketCreateScreen(props) {
             <ScrollView style={[GlobalStyle.container, {height: '100%'}]}>
             <View>
                 <TextInput
+                    style={[styles.form]}
+                    dense
                     mode='outlined'
                     label='Title'
                     value={title}
                     onChangeText={setTitle}
+                    maxLength={120}
                 />
                 <Dropdown
+                    style={[styles.dropdown, styles.form]}
                     data={categories}
+                    value={category}
                     labelField='name'
                     valueField='id'
-                    placeholder="Category"
-                    onChange={(value) => setCategory(value.name)}
+                    placeholder="Select category"
+                    onChange={(value) => {setCategory(value.name)}}
                 />
                 <TextInput
+                    style={[styles.form]}
                     mode='outlined'
                     multiline
                     dense
                     label="Description"
                     value={description}
                     onChangeText={setDescription}
+                    maxLength={32000}
                 />
             </View>
-            <View style={[GlobalStyle.inline]}>
+            <View style={[GlobalStyle.inline, {paddingTop: 10}]}>
                 <Button
                     mode='contained'
                     icon='file'
@@ -133,7 +140,7 @@ export default function TicketCreateScreen(props) {
                 >
                     Upload a file
                 </Button>
-                <View style={GlobalStyle.inline}>
+                <View style={[GlobalStyle.inline, {alignItems:'center'}]}>
                 <Checkbox
                      status={callRequested ? 'checked' : 'unchecked'}
                      onPress={() => {
@@ -143,7 +150,7 @@ export default function TicketCreateScreen(props) {
                 <Text>Call requested</Text>
                 </View>
             </View>
-            {file && <Chip onPress={() => {setFile(null)}}>{file[0].name}</Chip>}
+            {file && <Chip onClose={() => {setFile(null)}} onPress={() => {setFile(null)}}>{file[0].name}</Chip>}
             </ScrollView>
             <Button
                 style={styles.submitTicketButton}
@@ -159,7 +166,17 @@ export default function TicketCreateScreen(props) {
 
 const styles = StyleSheet.create({
     submitTicketButton:{
-        
         alignSelf: 'center',
+    },
+    dropdown: {
+        borderColor: 'grey',
+        borderWidth:1, 
+        borderRadius:5,
+        marginTop:5,
+        paddingLeft: 15
+    },
+    form:{
+        minHeight: 60,
+        
     }
 });
