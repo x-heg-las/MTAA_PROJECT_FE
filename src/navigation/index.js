@@ -375,7 +375,7 @@ export const AppStack = (props) => {
 
     return(
         <>
-            {  false && // for testing purpose
+            {  true && // for testing purpose
                 <>
                     <Button onPress={() => create(peer)}>calll</Button>
                     <TextInput title="peer" onChangeText={setPeer}></TextInput>

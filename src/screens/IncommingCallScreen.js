@@ -1,24 +1,41 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { 
     View,
-    Button,
+   
     Text,
     SafeAreaView,
     StyleSheet
 } from 'react-native';
-
+import {Title, FAB} from 'react-native-paper';
+import InCallManager from 'react-native-incall-manager';
 
 export const IncommingCallScreen = (props) => {
+
+    useEffect(() => {
+        InCallManager.setSpeakerphoneOn(true);
+        InCallManager.startRingtone('_BUNDLE_');
+
+        return () => {
+            InCallManager.stopRingtone();
+            InCallManager.setSpeakerphoneOn(false);
+        }
+    }, []);
 
     return(
         <SafeAreaView style={styles.container}>
           
                 <View style={styles.banner}>
-                    <Text>placeholder for something , incomming call screen</Text>
+                    <Title>Incomming call</Title>
                 </View>
                 <View style={styles.btnContainer}>
-                    <Button style={{marginRight: 20}} title="take" onPress={props.join}/>
-                    <Button style={{marginLeft: 20}} title="hangup" onPress={props.hangup}/>
+                    <FAB style={{marginRight: 20, backgroundColor:'green'}} 
+                        icon="phone"
+                        onPress={props.join}/>
+                    <FAB
+                        style={{marginLeft: 20, backgroundColor: 'red'}}
+                        title="hangup"
+                        icon="phone-off"
+                        onPress={props.hangup}/>
                 </View>
            
         </SafeAreaView>

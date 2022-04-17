@@ -84,6 +84,18 @@ export default function TicketCreateScreen(props) {
             console.log(response);
             props.navigation.goBack();
             props.route.params.onCreateTicket({created: true});
+            return;
+            
+            switch(response.status){
+                case 201:
+                    console.log(response);
+                    props.navigation.goBack();
+                    props.route.params.onCreateTicket({created: true});
+                    break;
+                case 401:
+                    //Logout 
+                default: 
+            }
         }).catch(err => {
             console.error(err);
         });

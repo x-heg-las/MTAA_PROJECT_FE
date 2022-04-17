@@ -4,12 +4,12 @@ import {Card, Title} from 'react-native-paper'
 import {TICKETS} from '../assets/dummy_data'
 import { STATUS_RESOLVED, STATUS_PENDING } from '../global/constants/Constants'
 
-export function TicketCard({ticketData}) {
+export function TicketCard({ticketData, onPress}) {
     
     console.log("tick tick" + ticketData); 
 
     return (
-        <Card style={{}}>
+        <Card onPress={() => onPress(ticketData)}>
             <Card.Content>
                 <View style={[styles.container]}>
                     <View style={[styles.row]}>
