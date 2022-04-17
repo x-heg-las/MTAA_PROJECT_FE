@@ -188,7 +188,6 @@ const styles = StyleSheet.create({
         paddingLeft: 15
     },
     form:{
-        minHeight: 60,
-        
+        minHeight: 60,  
     }
 });

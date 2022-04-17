@@ -9,6 +9,15 @@ const GlobalStyle = StyleSheet.create({
     },
     inline:{
         flexDirection: 'row',
+    },
+    form:{
+        minHeight: 60,  
+    },
+    profileImage:{ 
+        alignSelf: 'center',
+        height: 120,
+        width: 120,
+        borderRadius: 60
     }
 })
 

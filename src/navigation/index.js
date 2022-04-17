@@ -60,9 +60,13 @@ const NavigationBar = ({user, navigation, back}) => {
                     </View>
                 }
                 {
-                    (userData && userData.user_type__name === 'admin') &&
+                    //(userData && userData.user_type__name === 'admin') &&
                     <View>
-                        <Menu.Item onPress={() => {navigation.navigate("New User")}} title="Add user"/>
+                        <Menu.Item onPress={() => {
+                                navigation.navigate("New User");
+                                closeMenu();
+                            }} 
+                            title="Add user"/>
                     </View>
                 }
                 <Menu.Item onPress={() => {
@@ -375,7 +379,7 @@ export const AppStack = (props) => {
 
     return(
         <>
-            {  true && // for testing purpose
+            {  false && // for testing purpose
                 <>
                     <Button onPress={() => create(peer)}>calll</Button>
                     <TextInput title="peer" onChangeText={setPeer}></TextInput>
