@@ -6,13 +6,21 @@ import { useDispatch, useSelector } from "react-redux";
 import { Init, Login } from "../redux/store/actions"
 import { UserCard } from "../components/UserCard";
 import { getUsers, getFile } from "../api/apiCalls";
+import GlobalStyle from '../global/styles/GlobalStyles'
 
-export default function AllUsersScreen() {
+export default function AllUsersScreen({navigation}) {
   const dispatch = useDispatch()  
   const serverAddress = useSelector(state => state.SettingsReducer.address);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [resData, setResData] = useState([]);
+
+
+  const openProfile = (userdata) => {
+    if(userdata) {
+      navigation.navigate("Profile",  {user_id: userdata.id})
+    }
+  }
 
   const onChangeSearch = (query) => {
       setSearchQuery(query);
@@ -37,7 +45,7 @@ export default function AllUsersScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={GlobalStyle.container}>
         <Searchbar
         placeholder="Search"
         onChangeText={onChangeSearch}
@@ -45,9 +53,9 @@ export default function AllUsersScreen() {
         />
         <FlatList
             data={resData}
-            renderItem={({item}) =>{return <UserCard userData={item}/>}}
+            renderItem={({item}) =>{return <UserCard userData={item} onPress={openProfile}/>}}
         />
-    </View>
+    </SafeAreaView>
   );
 }
 

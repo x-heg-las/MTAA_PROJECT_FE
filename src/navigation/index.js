@@ -53,11 +53,10 @@ const NavigationBar = ({user, navigation, back}) => {
                 {
                     userData && 
                     <View>
-                        <Menu.Item title="Profile" onPress={() => { 
-                            navigation.navigate("Profile", {user_id: userData.id});
+                        <Menu.Item title="My profile" onPress={() => { 
+                            navigation.navigate("Profile",  {user_id: userData.id})
                             closeMenu();
                         }}/>
-                        <Menu.Item title="My organisation"/> 
                     </View>
                 }
                 {
@@ -87,7 +86,6 @@ const NavigationBar = ({user, navigation, back}) => {
                     userData && 
                     <Menu.Item onPress={() => {dispatch(Logout())}} title="Logout"/>
                 }
-                <Menu.Item title="About {not yet :D}"/>
             </View>
             </Menu>
         </Appbar.Header>
@@ -239,7 +237,7 @@ export const AppStack = (props) => {
     const create = async (chatId = 'chatId') => {
 
         setCurrentChatId(chatId);
-        console.log("create called with : "  + chatId);
+        console.log("create called with : "  + chatId + "   " + userData.username); ;
         if (chatId === null || chatId === userData.username) { return }
 
         console.log("Calling ");

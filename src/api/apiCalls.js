@@ -519,9 +519,15 @@ const postFile = async (address, fileData) => {
         },
         body: fileBlob
         })
-        .then(res => {return res.text()})
+        .then(res => {return Promise.all([res.status, res.text()])})
         .then(result => {
-            return JSON.parse(result);
+            console.log(result[1]);
+            const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
         });
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
@@ -554,7 +560,7 @@ const postFile = async (address, fileData) => {
 const getTicketTypes = async (address) => {
     let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        let fetchResponse = await fetch(`${address}/requesttype/`, {
+        let fetchResponse = await fetch(`${address}/requesttypes/`, {
             method: 'GET',
             headers: {
                 "Authorization": `Bearer ${accessToken}`
@@ -562,6 +568,7 @@ const getTicketTypes = async (address) => {
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
         .then((result) => {
+            console.log(result[1]);
             const response = JSON.parse(result[1]);
             console.log(response);
             return {
@@ -572,7 +579,7 @@ const getTicketTypes = async (address) => {
         );
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
-            fetchResponse = await fetch(`${address}/requesttype/`, {
+            fetchResponse = await fetch(`${address}/requesttypes/`, {
                 method: 'GET',
                 headers: {
                     "Authorization": `Bearer ${accessToken}`
@@ -580,6 +587,7 @@ const getTicketTypes = async (address) => {
             })
             .then((res) => {return Promise.all([res.status, res.text()])})
             .then((result) => {
+                console.log(result[1]);
                 const response = JSON.parse(result[1]);
                 console.log(response);
                 return {
@@ -599,7 +607,7 @@ const getTicketTypes = async (address) => {
 const getFileTypes = async (address) => {
     let accessToken = await AsyncStorage.getItem("accessToken");
     try {
-        let fetchResponse = await fetch(`${address}/filetype/`, {
+        let fetchResponse = await fetch(`${address}/filetypes/`, {
             method: 'GET',
             headers: {
                 "Authorization": `Bearer ${accessToken}`
@@ -607,6 +615,7 @@ const getFileTypes = async (address) => {
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
         .then((result) => {
+            console.log(result[1]);
             const response = JSON.parse(result[1]);
             console.log(response);
             return {
@@ -617,7 +626,7 @@ const getFileTypes = async (address) => {
         );
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
-            fetchResponse = await fetch(`${address}/filetype/`, {
+            fetchResponse = await fetch(`${address}/filetypes/`, {
                 method: 'GET',
                 headers: {
                     "Authorization": `Bearer ${accessToken}`

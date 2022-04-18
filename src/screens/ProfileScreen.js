@@ -59,7 +59,7 @@ export default function ProfileScreen({route, navigation}) {
     useEffect(() => {
         fetchProfile();
         fetchTickets();
-    }, []);
+    }, [route.params.user_id]);
 
     return (
         <SafeAreaView style={GlobalStyle.container}>
@@ -89,10 +89,10 @@ export default function ProfileScreen({route, navigation}) {
                         <View>
                             <Headline>{userData.full_name}</Headline>
                             {
-                               (true || (loggedUser.id != userData.id)) &&
+                               ((loggedUser.id != userData.id)) &&
                                 <Button 
                                     style={styles.callBtn} 
-                                    onPress={() => {route.params.onCall('meno')}}
+                                    onPress={() => {route.params.onCall(userData.username)}}
                                     mode='contained'>
                                         Call
                                     </Button>
