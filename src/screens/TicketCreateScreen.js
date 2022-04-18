@@ -5,7 +5,7 @@ import { View, Text,
 } from 'react-native'
 import GlobalStyle from '../global/styles/GlobalStyles'
 import React, {useState, useEffect} from 'react'
-import {Button, Checkbox, Chip, TextInput} from 'react-native-paper'
+import {Button, Checkbox, Chip, TextInput, HelperText, Snackbar} from 'react-native-paper'
 import { Dropdown } from 'react-native-element-dropdown';
 import DocumentPicker, {
     DirectoryPickerResponse,
@@ -13,20 +13,22 @@ import DocumentPicker, {
     isInProgress,
     types,
   } from 'react-native-document-picker'
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import { postFile, postTickets } from '../api/apiCalls';
 import { SettingsReducer } from '../redux/store/reducers';
-
+import {passwordValidator, textValidator } from '../validators';
 
 export default function TicketCreateScreen(props) {
     const [title, setTitle] = useState('');
-    const [category, setCategory] = useState();
+    const [category, setCategory] = useState(null);
     const [description, setDescription] = useState('');
     const [categories, setCategories] = useState( [{id:1, name:'Technical'}]);
     const [callRequested, setCallRequested] = useState(false);
     const [file, setFile] = useState(null);
     const serverAddress =  useSelector(state => state.SettingsReducer.address);
     const userData =  useSelector(state => state.AuthReducer.userData);   
+    const [visible, setVisible] = useState(false);
+    const dispatch = useDispatch()
 
 
     const handleError = (err) => {
@@ -49,23 +51,45 @@ export default function TicketCreateScreen(props) {
 
     }, []); 
 
+    
+    //Validate entry 
+    const validateForm = () => {
+        return(
+            textValidator(title.trim(), {length_min: 3}) && 
+            textValidator(description.trim()) &&
+            category != null
+        );
+    }
+    /////////////////////////////////
+    
     const submitTicket = async () => {
        
-        //Validate entry 
-        ///
-        /////////////////////////////////
+       if(!validateForm()) {
+        setVisible(true);
+        return;
+       } 
         
+
+
         //First send file if exists and wait for response
 
         let fileUpload = null;
         if(file !== null) {
-            const uploadResponse = await postFile(serverAddress, userData.username, userData.password, file[0]);
+            const uploadResponse = await postFile(serverAddress, file[0]);
+            switch(uploadResponse.status){
+                case 401:
+                    dispatch(Logout());
+                    break;
+                case 404:
+                    break;
+                default:
+            }
             console.log("Upload response"+uploadResponse);
             if(uploadResponse === null) {
                 console.error("could not post file");
                 return;
             } else {   
-                fileUpload = uploadResponse.id;
+                fileUpload = uploadResponse.body.id;
             }
             
         }
@@ -80,7 +104,7 @@ export default function TicketCreateScreen(props) {
         }
 
 
-        postTickets(serverAddress, userData.username, userData.password, data).then(response => {
+        postTickets(serverAddress, data).then(response => {
             console.log(response);
             props.navigation.goBack();
             props.route.params.onCreateTicket({created: true});
@@ -114,6 +138,10 @@ export default function TicketCreateScreen(props) {
                     onChangeText={setTitle}
                     maxLength={120}
                 />
+                {
+                    !textValidator(title.trim(), {length_min: 3}) && 
+                    <HelperText type='error' visible={true}>Title must be at least 3 characters long</HelperText>
+                }
                 <Dropdown
                     style={[styles.dropdown, styles.form]}
                     data={categories}
@@ -123,6 +151,10 @@ export default function TicketCreateScreen(props) {
                     placeholder="Select category"
                     onChange={(value) => {setCategory(value.name)}}
                 />
+                {
+                    (category != null) &&
+                    <HelperText type='error' visible={true}>Please select category</HelperText>
+                }
                 <TextInput
                     style={[styles.form]}
                     mode='outlined'
@@ -133,6 +165,10 @@ export default function TicketCreateScreen(props) {
                     onChangeText={setDescription}
                     maxLength={32000}
                 />
+                {
+                    !textValidator(description.trim()) && 
+                    <HelperText type='error' visible={true}>Please fill in description</HelperText>
+                }
             </View>
             <View style={[GlobalStyle.inline, {paddingTop: 10}]}>
                 <Button
@@ -171,6 +207,18 @@ export default function TicketCreateScreen(props) {
             >
                 CREATE
             </Button>
+            <Snackbar
+                    visible={visible}
+                    onDismiss={() => setVisible(false)}
+                    duration={3000}
+                    action={{
+                    label: 'Undo',
+                    onPress: () => {
+                        setVisible(false);
+                    },
+                    }}>
+                    Fill in all required forms.
+                </Snackbar>   
         </View>
     )
 }

@@ -53,7 +53,7 @@ const NavigationBar = ({user, navigation, back}) => {
                     userData && 
                     <View>
                         <Menu.Item title="Profile" onPress={() => { 
-                            navigation.navigate("Profile");
+                            navigation.navigate("Profile", {user_id: userData.id});
                             closeMenu();
                         }}/>
                         <Menu.Item title="My organisation"/> 
@@ -111,6 +111,7 @@ export const AppStack = (props) => {
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const [callRoom, setCallroom] = useState(null);
+    const [currentChatId, setCurrentChatId] = useState('');
     //========
 
     const init = () => {
@@ -226,13 +227,16 @@ export const AppStack = (props) => {
     }
 
     const create = async (chatId = 'chatId') => {
+
+        setCurrentChatId(chatId);
+        console.log("create called with : "  + chatId);
         if (chatId === null || chatId === userData.username) { return }
 
         console.log("Calling ");
         connecting.current = true;
         await setupWebrtc();
         //signal the second party.
-        const roomId = Math.random().toString(36).substring(0,12);
+        const roomId = Math.random().toString(36).substring(0,34);
 
         const cRef = firestore().collection("meet").doc(roomId);
         //TODO : change local name
@@ -324,7 +328,7 @@ export const AppStack = (props) => {
         setGettingCall(false);
         connecting.current = false;
         streamCleanup();
-        await firestoreCleanup();
+        firestoreCleanup();
         if(pc.current) {
             pc.current.close();
         }
@@ -341,7 +345,8 @@ export const AppStack = (props) => {
     }
 
     const firestoreCleanup = async () => {
-        const cRef = firestore().collection('meet').doc('chatId');
+        /*
+        const cRef = firestore().collection('meet').doc(currentChatId);
         if(cRef) {
             const calleeCandidate = await cRef.collection('callee').get();
             calleeCandidate.forEach(async (c) => {
@@ -355,7 +360,7 @@ export const AppStack = (props) => {
             firestore().collection(peer).doc('room').delete()
             cRef.delete();
         }
-
+        */
         const sRef = firestore().collection(userData.username).doc('room');
         if(sRef){
             sRef.delete();
@@ -394,7 +399,7 @@ export const AppStack = (props) => {
                 <Stack.Screen name="Dashboard" component={DashboardScreen}/>
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
-                <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} initialParams={{onCall: create}} />
                 <Stack.Screen name="New User" component={UserCreateScreen} />
             </Stack.Navigator>
         </>

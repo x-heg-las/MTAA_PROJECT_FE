@@ -47,6 +47,9 @@ const refreshToken = async (address) => {
         let refToken = await AsyncStorage.getItem("refreshToken");
         return await fetch(`${address}/api/token/refresh/`, {
         method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({"refresh": refToken})
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
@@ -54,6 +57,7 @@ const refreshToken = async (address) => {
             const response = JSON.parse(result[1]);
             console.log("Refreshing Token...");
             if (result[0] === 200) {
+                console.log("ok")
                 AsyncStorage.setItem("accessToken", response.access);
             }
             return {
@@ -458,7 +462,8 @@ const getFile = async (address, params={}) => {
         }
         })
         .then(res => {
-            return res.blob();
+            
+            return res;
         });
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
@@ -469,7 +474,7 @@ const getFile = async (address, params={}) => {
                 }
                 })
                 .then(res => {
-                    return res.blob();
+                    return res;
                 });
         }
         return fetchResponse;
@@ -508,10 +513,16 @@ const postFile = async (address, fileData) => {
                 },
                 body: fileBlob
                 })
-                .then(res => {return res.text()})
-                .then(result => {
-                    return JSON.parse(result);
-                });
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+                );
         }
         return fetchResponse;
     } catch (error) {
@@ -655,4 +666,5 @@ const getUserTypes = async (address) => {
     }
 }
 
-export { userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+
+export { constructParams ,userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
