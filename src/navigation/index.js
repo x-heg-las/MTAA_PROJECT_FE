@@ -11,6 +11,7 @@ import ProfileScreen from '../screens/ProfileScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import UserCreateScreen from '../screens/UserCreateScreen';
 import TicketCreateScreen from '../screens/TicketCreateScreen';
+import AllUsersScreen from '../screens/AllUsersScreen';
 import {CallUtils} from '../utils/CallUtils';
 import {CallScreen} from '../screens/CallScreen';
 import firestore from '@react-native-firebase/firestore';
@@ -57,6 +58,15 @@ const NavigationBar = ({user, navigation, back}) => {
                             closeMenu();
                         }}/>
                         <Menu.Item title="My organisation"/> 
+                    </View>
+                }
+                {
+                    userData && 
+                    <View>
+                        <Menu.Item title="All Users" onPress={() => { 
+                            navigation.navigate("All Users");
+                            closeMenu();
+                        }}/>
                     </View>
                 }
                 {
@@ -395,6 +405,7 @@ export const AppStack = (props) => {
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="All Users" component={AllUsersScreen} />
                 <Stack.Screen name="New User" component={UserCreateScreen} />
             </Stack.Navigator>
         </>
