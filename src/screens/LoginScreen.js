@@ -24,7 +24,7 @@ export function LoginScreen({navigation}) {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
       if(response.status === 200) {
 
-        dispatch(Login(response, password));
+        dispatch(Login(response.body, password));
         getUsers(serverAddress);
       }
     });

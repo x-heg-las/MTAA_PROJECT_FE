@@ -12,6 +12,15 @@ function constructParams(params) {
     return url;
 }
 
+function getBase64(file, onLoadCallback) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() { resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
 const getTokens = async (address, username, password) => {
     try {
         return await fetch(`${address}/api/token/`, {
@@ -47,6 +56,9 @@ const refreshToken = async (address) => {
         let refToken = await AsyncStorage.getItem("refreshToken");
         return await fetch(`${address}/api/token/refresh/`, {
         method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({"refresh": refToken})
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
@@ -396,7 +408,7 @@ const deleteUsers = async (address, params) => {
         }
         })
         .then(res => {
-            return res.status;
+            return {status: res.status, body: null};
         });
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
@@ -407,7 +419,7 @@ const deleteUsers = async (address, params) => {
                 }
                 })
                 .then(res => {
-                    return {status: res.status};
+                    return {status: res.status, body: null};
                 });
         }
         return fetchResponse;
@@ -427,7 +439,7 @@ const deleteTickets = async (address, params) => {
         }
         })
         .then(res => {
-            return res.status;
+            return {status: res.status, body: null};
         });
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
@@ -438,7 +450,7 @@ const deleteTickets = async (address, params) => {
                 }
                 })
                 .then(res => {
-                    return {status: res.status};
+                    return {status: res.status, body: null};
                 });
         }
         return fetchResponse;
@@ -448,7 +460,7 @@ const deleteTickets = async (address, params) => {
     }
 }
 
-const getFile = async (address, params={}) => {
+const getFile = async (address, params) => {
     let accessToken = await AsyncStorage.getItem("accessToken");
     try {
         let fetchResponse = await fetch(`${address}/file/${constructParams(params)}`, {
@@ -458,8 +470,12 @@ const getFile = async (address, params={}) => {
         }
         })
         .then(res => {
-            return res.blob();
-        });
+            return {status:res.status, body: res.blob().then(resBlob => {
+                return getBase64(resBlob);
+                })
+            }
+            }
+        );
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
             fetchResponse = await fetch(`${address}/file/${constructParams(params)}`, {
@@ -469,8 +485,12 @@ const getFile = async (address, params={}) => {
                 }
                 })
                 .then(res => {
-                    return res.blob();
-                });
+                    return {status:res.status, body: res.blob().then(resBlob => {
+                        return getBase64(resBlob);
+                        })
+                    }
+                    }
+                );
         }
         return fetchResponse;
     } catch (error) {
