@@ -66,6 +66,7 @@ const refreshToken = async (address) => {
             const response = JSON.parse(result[1]);
             console.log("Refreshing Token...");
             if (result[0] === 200) {
+                console.log("ok")
                 AsyncStorage.setItem("accessToken", response.access);
             }
             return {
@@ -470,12 +471,14 @@ const getFile = async (address, params) => {
         }
         })
         .then(res => {
+
             return {status:res.status, body: res.blob().then(resBlob => {
                 return getBase64(resBlob);
                 })
             }
             }
         );
+
         if (fetchResponse.status === 401) {
             accessToken = (await refreshToken(address)).body.access;
             fetchResponse = await fetch(`${address}/file/${constructParams(params)}`, {
@@ -485,12 +488,14 @@ const getFile = async (address, params) => {
                 }
                 })
                 .then(res => {
+
                     return {status:res.status, body: res.blob().then(resBlob => {
                         return getBase64(resBlob);
                         })
                     }
                     }
                 );
+
         }
         return fetchResponse;
     } catch (error) {
@@ -528,10 +533,16 @@ const postFile = async (address, fileData) => {
                 },
                 body: fileBlob
                 })
-                .then(res => {return res.text()})
-                .then(result => {
-                    return JSON.parse(result);
-                });
+                .then((res) => {return Promise.all([res.status, res.text()])})
+                .then((result) => {
+                    const response = JSON.parse(result[1]);
+                    console.log(response);
+                    return {
+                        status: result[0],
+                        body: response
+                    }
+                }
+                );
         }
         return fetchResponse;
     } catch (error) {
@@ -675,4 +686,5 @@ const getUserTypes = async (address) => {
     }
 }
 
-export { userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+
+export { constructParams ,userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };

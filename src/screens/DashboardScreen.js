@@ -7,6 +7,7 @@ import {FAB, ToggleButton, Button, ActivityIndicator, Colors, Snackbar, Paragrap
 import {TicketCard} from '../components/TicketCard';
 import {useSelector} from 'react-redux';
 import {TICKETS} from '../assets/dummy_data';
+import {getTickets} from '../api/apiCalls'
 
 export default function DashboardScreen(props) {
 
@@ -17,18 +18,21 @@ export default function DashboardScreen(props) {
     const [answerModal, setAnswerModal] = useState(false);
     const [answer, setAnswer] = useState('');
     const [openTicket, setOpenTicket] = useState(TICKETS[0]);
+    const [pendingTickets, setPendingTickets] = useState([]);
+    const [allTickets, setAllTickets] = useState([]);
     const [page, setPage] = useState(1);
     const user = useSelector(state => state.AuthReducer.userData)
     const [message, setMessage] = useState('');
-    const fetchData = () => {
-
-
-
+    const serverAddress = useSelector(state => state.SettingsReducer.address);
+    const fetchData = async () => {
+        //const response = await getTickets(serverAddress);
     }
 
 
-    const fetchTicketOwner = () => {
+    const fetchTicketOwner = async (userId) => {
+        if(userId) {
 
+        }
     }
     
     useEffect(() => {
@@ -63,13 +67,13 @@ export default function DashboardScreen(props) {
                 >
                     <ToggleButton
                         status={filter === 'pending' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'pending' ? styles.active: null]}
+                        style={[styles.optionBtn, filter === 'pending' ? styles.active: null, GlobalStyle.toggleBtn]}
                         icon={() => <Text>Pending</Text>}
                         value='pending'>
                     </ToggleButton>
                     <ToggleButton
                         status={filter === 'all' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'all' ? styles.active: null]}
+                        style={[styles.optionBtn, filter === 'all' ? styles.active: null, GlobalStyle.toggleBtn]}
                         icon={() => <Text>All</Text>} 
                         value='all'>
                     </ToggleButton>

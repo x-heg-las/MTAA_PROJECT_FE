@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet } from 'react-native'
+import { View, StyleSheet } from 'react-native'
 import React, {useEffect} from 'react'
-import {Card, Title} from 'react-native-paper'
+import {Card, Title, Text} from 'react-native-paper'
 import {TICKETS} from '../assets/dummy_data'
 import { STATUS_RESOLVED, STATUS_PENDING } from '../global/constants/Constants'
 
