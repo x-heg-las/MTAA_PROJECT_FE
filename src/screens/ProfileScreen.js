@@ -7,11 +7,12 @@ import GlobalStyle from '../global/styles/GlobalStyles';
 import {AuthReducer, SettingsReducer} from '../redux/store/reducers'
 import { getTickets } from '../api/apiCalls';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({_userData}) {
     const [filter, setFilter] = useState('resolved');
     const [resolved, setResolved] = useState([]);
     const [pending, setPending] = useState([]);
     const [total, setTotal] = useState();
+    const [profileImage, setProfileimage] = useState(null); 
     const userData = useSelector(state => state.AuthReducer.userData);
     const serverAddress = useSelector(state => state.SettingsReducer.address);
 
@@ -42,12 +43,14 @@ export default function ProfileScreen() {
         <SafeAreaView style={GlobalStyle.container}>
             <View style={styles.profileInfo}>
                 <View style={[{flex:1, alignItems: 'center', justifyContent: 'space-evenly', verticalAlign: 'middle', backgroundColor: '#432312'}]}>
-                    <View style={{backgroundColor: 'blue'}}>
-                        {
-                            (userData.profile_img_file != null) ?
-                            <Text>fotka</Text> : <Avatar.Text size={24} label="PH"/>
-                        }
-                    </View>
+                <View style={[{flex: 1}, styles.imageView]}>
+                    {
+                        profileImage ?
+                        <Avatar.Image style={GlobalStyle.profileImage} size={120} source={{uri:profileImage[0].uri}} />
+                        :
+                        <Avatar.Text style={GlobalStyle.profileImage} size={120} label={userData.full_name.split(' ').map(w => w[0]).join('')} />
+                    }
+                </View>
                     <View>
                         <Text>{userData.username}</Text>
                         <Text>ID: {userData.id}</Text>

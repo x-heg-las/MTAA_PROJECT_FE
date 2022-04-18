@@ -4,7 +4,6 @@ export class CallUtils {
     static async getStream() {
         let isFront = true;
         const sourceInfos = await mediaDevices.enumerateDevices()
-        console.log(sourceInfos);
         let videoSourceId;
         for (let i = 0; i < sourceInfos.length; i++) {
             const sourceInfo = sourceInfos[i];

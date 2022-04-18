@@ -21,7 +21,8 @@ import {
     RTCPeerConnection,
     RTCIceCandidate,
     RTCSessionDescription,
-} from 'react-native-webrtc'
+} from 'react-native-webrtc';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -59,9 +60,13 @@ const NavigationBar = ({user, navigation, back}) => {
                     </View>
                 }
                 {
-                    (userData && userData.user_type__name === 'admin') &&
+                    //(userData && userData.user_type__name === 'admin') &&
                     <View>
-                        <Menu.Item onPress={() => {navigation.navigate("New User")}} title="Add user"/>
+                        <Menu.Item onPress={() => {
+                                navigation.navigate("New User");
+                                closeMenu();
+                            }} 
+                            title="Add user"/>
                     </View>
                 }
                 <Menu.Item onPress={() => {
@@ -95,27 +100,7 @@ export const AuthStack = (props) => {
 
 export const AppStack = (props) => {
 
-    const userData = null;
-
-    return(
-        <Stack.Navigator
-            initialRouteName="Dashboard"
-            screenOptions={{
-                header: (props) => <NavigationBar user={userData} {...props}/>,
-            }}
-        >
-            <Stack.Screen name="Dashboard" component={DashboardScreen}/>
-            <Stack.Screen name="Settings" component={SettingsScreen} />
-            <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
-            <Stack.Screen name="Profile" component={ProfileScreen} />
-            <Stack.Screen name="New User" component={UserCreateScreen} />
-        </Stack.Navigator>
-    )
-}
-
-const RootNavigator = (props) => {
     const [gettingCall, setGettingCall] = useState(false);
-    const token = useSelector(state => state.AuthReducer.authToken);
     const configuration = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
     const dispatch = useDispatch();
     const userData = useSelector(state => state.AuthReducer.userData);
@@ -125,6 +110,7 @@ const RootNavigator = (props) => {
     const [peer, setPeer] = useState();
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
+    const [callRoom, setCallroom] = useState(null);
     //========
 
     const init = () => {
@@ -133,40 +119,76 @@ const RootNavigator = (props) => {
 
     useEffect(() => {
         //init();
+        const roomId = Math.random().toString(36).substring(0,12);
+        if(true) { 
 
-        if(true) {
-
-            const cRef = firestore().collection('meet').doc('chatId');  
-
-            const subscribe = cRef.onSnapshot(snapshot => {
-                const data = snapshot.data();
-
-                //starts call on answer
-                if(pc.current && !pc.current.remoteDesription && data && data.answer) {
-                    pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
-                }
-
-                if(data && data.offer && !connecting.current) {
-                    setGettingCall(true);
-                }
-            });
-
-            
-            const subscribtionDelete = cRef.collection('callee').onSnapshot(s => {
+            //const cRef = firestore().collection('meet').doc('chatId');
+             
+            const cRef = firestore().collection(userData.username);            
+            const subscribtionDelete = firestore().collection('meet').doc(callRoom).collection('callee').onSnapshot(s => {
                 s.docChanges().forEach((change) => {
                     if(change.type == 'removed') {
                         hangup();
                     }
+                    console.warn("toto niee");
+                    setCallroom(null);
                 });
+                
             });
+
+            const subscribeSignaling = firestore().collection(userData.username).onSnapshot(snapshot => {
+                snapshot.docChanges().forEach( async (change) => {
+                    if(change.type == 'added' || change.type == 'update') {
+                        let data = change.doc.data();
+                        setCallroom(data.room);
+                        startListener(data.room);
+                        startRemoveListener(data.room)
+                        return;
+                    }
+                })
+            });
+
             return () => {
-                subscribe();
+                subscribeSignaling();
                 subscribtionDelete();
             }
      }
 
     }, []);
 
+
+    const startListener = async (roomId) => {
+        const subscribtionDelete = firestore().collection('meet').doc(roomId).onSnapshot(snapshot => {
+        
+           
+            const data = snapshot.data();
+            //starts call on answer
+            if(pc.current && !pc.current.remoteDesription && data && data.answer) {
+                console.warn("setting answer");
+                pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+            }
+            
+            if(data && data.offer && !connecting.current) {
+                console.log("tu ano")
+                setGettingCall(true);
+            }
+        });
+        
+    }
+
+    const startRemoveListener = async (roomId) => {
+        const subscribtionDelete = firestore().collection('meet').doc(roomId).collection('callee').onSnapshot(s => {
+            s.docChanges().forEach((change) => {
+                if(change.type == 'removed') {
+                    hangup();
+                    console.warn("toto niee");
+                    setCallroom(null);
+                }
+                
+            });
+            
+        });
+    }
 
 
     const setupWebrtc = async () => {
@@ -182,6 +204,7 @@ const RootNavigator = (props) => {
         }
 
     }
+    
 
     const collectIceCandidates = async (cRef, localName, remoteName) => {
         const candidateCollection = cRef.collection(localName);
@@ -202,13 +225,16 @@ const RootNavigator = (props) => {
         })
     }
 
-    const create = async (caller = 'caller', callee = 'callee', chatId = 'chatId') => {
-        if (chatId === null) { return }
+    const create = async (chatId = 'chatId') => {
+        if (chatId === null || chatId === userData.username) { return }
 
         console.log("Calling ");
         connecting.current = true;
         await setupWebrtc();
-        const cRef = firestore().collection("meet").doc('chatId');
+        //signal the second party.
+        const roomId = Math.random().toString(36).substring(0,12);
+
+        const cRef = firestore().collection("meet").doc(roomId);
         //TODO : change local name
         collectIceCandidates(cRef, 'caller', 'callee');
         
@@ -226,7 +252,40 @@ const RootNavigator = (props) => {
                    
                 },
             };
-            cRef.set(cWithOffer);
+            await cRef.set(cWithOffer);
+            firestore().collection(chatId).doc('room').set({room : roomId});
+            setCallroom(roomId);
+
+
+
+            const subscribtionSet = firestore().collection('meet').doc(roomId).onSnapshot(snapshot => {
+        
+           
+                const data = snapshot.data();
+                //starts call on answer
+                if(pc.current && !pc.current.remoteDesription && data && data.answer) {
+                    console.warn("setting answer");
+                    pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
+                }
+                
+                if(data && data.offer && !connecting.current) {
+                    console.log("tu ano")
+                    setGettingCall(true);
+                }
+            });
+
+            const subscribtionDelete = firestore().collection('meet').doc(roomId).collection('callee').onSnapshot(s => {
+                s.docChanges().forEach((change) => {
+                    if(change.type == 'removed') {
+                        hangup();
+                        console.warn("toto niee");
+                        setCallroom(null);
+                    }
+                    
+                });
+                
+            });
+
         }
     }
 
@@ -234,14 +293,20 @@ const RootNavigator = (props) => {
         console.log("Joining call");
         connecting.current = true;
         setGettingCall(false);
-        const cRef = firestore().collection('meet').doc('chatId');
+        console.log("joining")
+        
+        const cRef = firestore().collection('meet').doc(chatId);
         const offer = (await cRef.get()).data()?.offer;
+       
         if(offer) {
             await setupWebrtc();
+            
             collectIceCandidates(cRef,  'callee', 'caller');
-
+            console.warn("Offer: "+offer);
             if(pc.current) {
-                 pc.current.setRemoteDescription(new RTCSessionDescription(offer));
+                
+                console.warn(chatId);
+                 pc.current.setRemoteDescription(new RTCSessionDescription(offer)).catch(e => console.error(e));
                 const answer = await pc.current.createAnswer();
                 pc.current.setLocalDescription(answer);
                 const cWithAnswer = {
@@ -259,10 +324,11 @@ const RootNavigator = (props) => {
         setGettingCall(false);
         connecting.current = false;
         streamCleanup();
-        firestoreCleanup('caller', 'callee', peer);
+        await firestoreCleanup();
         if(pc.current) {
             pc.current.close();
         }
+        setCallroom(null);
     };
 
     const streamCleanup = async () => {
@@ -274,7 +340,7 @@ const RootNavigator = (props) => {
         setRemoteStream(null);
     }
 
-    const firestoreCleanup = async (caller = 'caller', callee = 'callee' , chatId = 'chatId') => {
+    const firestoreCleanup = async () => {
         const cRef = firestore().collection('meet').doc('chatId');
         if(cRef) {
             const calleeCandidate = await cRef.collection('callee').get();
@@ -285,8 +351,16 @@ const RootNavigator = (props) => {
             callerCandidate.forEach(async (c) => {
                 await c.ref.delete();
             });
+            firestore().collection(userData.username).doc('room').delete()
+            firestore().collection(peer).doc('room').delete()
             cRef.delete();
         }
+
+        const sRef = firestore().collection(userData.username).doc('room');
+        if(sRef){
+            sRef.delete();
+        }
+        setCallroom(null);
     }
 
     if(localStream) {
@@ -296,24 +370,43 @@ const RootNavigator = (props) => {
     }
 
 
-    if(gettingCall){
+    if(gettingCall && callRoom != null){
         
-      
         return (
-           <IncommingCallScreen join={join} hangup={hangup}/>
+           <IncommingCallScreen join={() => join(callRoom)} hangup={hangup}/>
         )
     }
 
- 
+    return(
+        <>
+            {  false && // for testing purpose
+                <>
+                    <Button onPress={() => create(peer)}>calll</Button>
+                    <TextInput title="peer" onChangeText={setPeer}></TextInput>
+                </>
+            }
+            <Stack.Navigator
+                initialRouteName="Dashboard"
+                screenOptions={{
+                    header: (props) => <NavigationBar user={userData} {...props}/>,
+                }}
+            >
+                <Stack.Screen name="Dashboard" component={DashboardScreen}/>
+                <Stack.Screen name="Settings" component={SettingsScreen} />
+                <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="New User" component={UserCreateScreen} />
+            </Stack.Navigator>
+        </>
+    )
+}
+
+const RootNavigator = (props) => {
+    const token = useSelector(state => state.AuthReducer.authToken);
+
     return (
         
         <NavigationContainer>
-            <Button onPress={create}>calll</Button>
-            <TextInput title="peer" onChangeText={setPeer}></TextInput>
-            {
-                (token !== null && gettingCall) && 
-                <></>
-            }
             {
                 token === null ?
                 <AuthStack/> : <AppStack/>
