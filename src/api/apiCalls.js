@@ -68,6 +68,31 @@ const refreshToken = async (address) => {
     }
 }
 
+const userLogin = async (address, username, password) => {
+    try {
+        let accessToken = (await getTokens(address, username, password)).body.access;
+        return await fetch(`${address}/users/${constructParams({username: username})}`, {
+            method: 'GET',
+            headers: {
+                "Authorization": `Bearer ${accessToken}`
+            }
+        })
+        .then((res) => {return Promise.all([res.status, res.text()])})
+            .then((result) => {
+                const response = JSON.parse(result[1]);
+                console.log(response);
+                return {
+                    status: result[0],
+                    body: response.items[0]
+                }
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
 const getUsers = async (address, params={}) => {
     try {
         let accessToken = await AsyncStorage.getItem("accessToken");
@@ -630,4 +655,4 @@ const getUserTypes = async (address) => {
     }
 }
 
-export { getTokens, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+export { userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };

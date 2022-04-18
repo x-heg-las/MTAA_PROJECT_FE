@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, View, Image, TextInput, SafeAreaView } from "react-native";
 import { Button, Snackbar } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
-import { getTokens, getUsers } from "../api/apiCalls"
+import { getUsers, userLogin } from "../api/apiCalls"
 import { Init, Login } from "../redux/store/actions"
 
 
@@ -20,7 +20,7 @@ export function LoginScreen({navigation}) {
 
   const onLoginPressed = async () => {
 
-    getTokens(serverAddress, username, password).then(response => {
+    userLogin(serverAddress, username, password).then(response => {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
       if(response.status === 200) {
 
