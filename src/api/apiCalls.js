@@ -36,6 +36,7 @@ const getTokens = async (address, username, password) => {
         }
         );
     } catch (error) {
+
         console.error(error);
         return null;
     }

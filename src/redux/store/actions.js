@@ -12,7 +12,13 @@ export const Init = () => {
                 dispatch({
                     type: 'SET_ADDR',
                     payload: serverAddress,
-                }))
+
+                })).then(() =>
+                    dispatch ({
+                        type: 'LOGIN',
+                        userData: null 
+                    })
+                )
         } else {
 
             dispatch ({

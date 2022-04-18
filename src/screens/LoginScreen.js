@@ -13,13 +13,15 @@ export function LoginScreen({navigation}) {
   const serverAddress = useSelector(state => state.SettingsReducer.address);
   
   useEffect(() => {
-    dispatch(Init());
+    //dispatch(Init());
   }, [])
 
   const onLoginPressed = async () => {
+
     getTokens(serverAddress, username, password).then(response => {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
       if(response.status === 200) {
+
         dispatch(Login(response, password));
         getUsers(serverAddress);
       }
