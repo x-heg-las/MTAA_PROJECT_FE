@@ -23,8 +23,7 @@ export function LoginScreen({navigation}) {
     userLogin(serverAddress, username, password).then(response => {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
       if(response.status === 200) {
-        //console.warn(response);
-        //return;
+
         dispatch(Login(response.body, password));
         getUsers(serverAddress);
       }
