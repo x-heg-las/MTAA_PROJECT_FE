@@ -96,7 +96,7 @@ const userLogin = async (address, username, password) => {
                 console.log(response);
                 return {
                     status: result[0],
-                    body: response.items[0]
+                    body: response.items ? response.items[0] : null
                 }
             }
         );

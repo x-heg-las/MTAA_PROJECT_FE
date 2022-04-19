@@ -53,7 +53,9 @@ const NavigationBar = ({user, navigation, back}) => {
             <View style={{ flex: 1 }}>
                 {
                     userData && 
+
                     <View>
+                        <Menu.Item title="Dashboard" onPress={() => {navigation.navigate("Dashboard"); closeMenu()}} />
                         <Menu.Item title="My profile" onPress={() => { 
                             navigation.navigate("Profile",  {user_id: userData.id})
                             closeMenu();

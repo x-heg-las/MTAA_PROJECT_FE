@@ -30,19 +30,17 @@ export function LoginScreen({navigation}) {
           break;
         case 404:
           setMessage("User does not exist");
-          setVisible(true);
+          setShowWarning(true);
           break;
         case 401:
           setMessage("Invalid credentials");
-          setVisible(true);
+          setShowWarning(true);
+          break;
         default:
           setMessage("Some error occured");
-          setVisible(true);
+          setShowWarning(true);
       }
-      
-      if(response.status === 200) {
-        
-      }
+ 
     });
 }
 

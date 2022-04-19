@@ -65,15 +65,7 @@ export function TicketCard({item, onUpdate, onClick}) {
                             size={20}
                             onPress={() => {deleteTicket(item.id)}}
                             disabled={!canDelete}
-                        />
-                        <IconButton
-                            icon="pen"
-                            color={'blue'}
-                            size={20}
-                            onPress={() => console.log('Pressed')}
-                            disabled={!canUpdate}
-                        />
-                        
+                        /> 
                     </View>
                 </View>
                 
