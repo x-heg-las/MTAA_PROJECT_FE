@@ -14,7 +14,7 @@ export function UserCard({userData, onPress}) {
                 <View style={[styles.container]}>
                     <View style={[styles.row]}>
                         {
-                            userData.profileImage ?
+                            userData.profile_img_file ?
                             <Avatar.Image style={GlobalStyle.profileImage} size={120} source={{uri: userData.profileImage}} />
                             :
                             <Avatar.Text style={GlobalStyle.profileImage} size={120} label={userData.full_name.split(' ').map(w => w[0]).join('')} />

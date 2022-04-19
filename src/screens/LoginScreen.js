@@ -22,10 +22,26 @@ export function LoginScreen({navigation}) {
 
     userLogin(serverAddress, username, password).then(response => {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
+      if(response == null) {return;}
+      switch(response.status) {
+        case 200:
+          dispatch(Login(response.body, password));
+          getUsers(serverAddress);
+          break;
+        case 404:
+          setMessage("User does not exist");
+          setVisible(true);
+          break;
+        case 401:
+          setMessage("Invalid credentials");
+          setVisible(true);
+        default:
+          setMessage("Some error occured");
+          setVisible(true);
+      }
+      
       if(response.status === 200) {
-
-        dispatch(Login(response.body, password));
-        getUsers(serverAddress);
+        
       }
     });
 }

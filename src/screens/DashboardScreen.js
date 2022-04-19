@@ -1,5 +1,5 @@
 import { View,StyleSheet, SafeAreaView, FlatList, Modal, ScrollView } from 'react-native'
-import React, {useState,useEffect, useCallback} from 'react'
+import React, {useState,useEffect, useCallback, useRef} from 'react'
 import store from '../redux/store'
 import { useFocusEffect } from '@react-navigation/native';
 import GlobalStyle from '../global/styles/GlobalStyles';
@@ -13,7 +13,7 @@ import {TicketModal} from '../components/TicketModal';
 export default function DashboardScreen(props) {
 
     //const user = store.getState();
-    const [filter, setFilter] = useState('pending');
+   //const [filter, setFilter] = useState('pending');
     const [requests, setRequests] = useState([]);
     const [visible, setVisible] = useState(false);
     const [pendingTickets, setPendingTickets] = useState([]);
@@ -23,7 +23,8 @@ export default function DashboardScreen(props) {
     const user = useSelector(state => state.AuthReducer.userData)
     const [message, setMessage] = useState('');
     const serverAddress = useSelector(state => state.SettingsReducer.address);
-    
+    const filter = useRef('pending');
+
     useEffect(() => {
         fetchData();
         const willFocusSubscription = props.navigation.addListener('focus', () => {
@@ -47,7 +48,7 @@ export default function DashboardScreen(props) {
                 const allTickets = response.body.items;
                 let resolved = []; let pending = [];
                 allTickets.forEach(e => {
-                    if(e.answered_by_user !== null) {
+                    if(e.answered_by_user != null) {
                         resolved.push(e);
                     } else {
                         pending.push(e);
@@ -55,7 +56,8 @@ export default function DashboardScreen(props) {
                 });
                 setPendingTickets(pending);
                 setResolvedTickets(resolved);
-                if(filter === 'resolved') {
+                console.log("filter: " + filter);
+                if(filter.current === 'resolved') {
                     setRequests(resolved);
                 } else {
                     setRequests(pending);
@@ -78,12 +80,10 @@ export default function DashboardScreen(props) {
         }
     }
 
-    const refreshList = () => {
-        fetchData();
-    }
-
     const applyFilter = (value) => {
-        setFilter(value);
+        //setFilter(value);
+        filter.current = value;
+        console.log("applying filters");
         if(value === 'resolved') {
             setRequests(resolvedTickets);
         } else {
@@ -97,17 +97,17 @@ export default function DashboardScreen(props) {
                 <ToggleButton.Group
                     style={styles.inline}
                     onValueChange={applyFilter}
-                    value={filter}
+                    value={filter.current}
                 >
                     <ToggleButton
-                        status={filter === 'pending' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'pending' ? styles.active: null, GlobalStyle.toggleBtn]}
+                        status={filter.current === 'pending' ? 'checked' : 'unchecked'}
+                        style={[styles.optionBtn, filter.current === 'pending' ? styles.active: null, GlobalStyle.toggleBtn]}
                         icon={() => <Text>Pending</Text>}
                         value='pending'>
                     </ToggleButton>
                     <ToggleButton
-                        status={filter === 'resolved' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'resolved' ? styles.active: null, GlobalStyle.toggleBtn]}
+                        status={filter.current === 'resolved' ? 'checked' : 'unchecked'}
+                        style={[styles.optionBtn, filter.current === 'resolved' ? styles.active: null, GlobalStyle.toggleBtn]}
                         icon={() => <Text>Resolved</Text>} 
                         value='resolved'>
                     </ToggleButton>

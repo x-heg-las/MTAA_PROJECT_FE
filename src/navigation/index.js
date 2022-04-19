@@ -70,7 +70,7 @@ const NavigationBar = ({user, navigation, back}) => {
                     </View>
                 }
                 {
-                    //(userData && userData.user_type__name === 'admin') &&
+                    (userData && userData.user_type__name === 'admin') &&
                     <View>
                         <Menu.Item onPress={() => {
                                 navigation.navigate("New User");

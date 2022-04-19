@@ -8,7 +8,7 @@ import React, { useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {RegisterServer} from '../redux/store/actions'
+import {RegisterServer, Logout} from '../redux/store/actions'
 import { 
   TextInput,
   Button,
@@ -16,7 +16,7 @@ import {
 } from 'react-native-paper';
 import {AuthReducer} from '../redux/store/reducers';
 import GlobalStyle from '../global/styles/GlobalStyles'
-import {moduleName} from '../api/apiCalls';
+import {deleteUsers} from '../api/apiCalls';
 
 export default function SettingsScreen(props) {
   const dispatch = useDispatch();
@@ -39,6 +39,7 @@ export default function SettingsScreen(props) {
     switch(result.status) {
       default:
        dispatch(Logout());
+       navigation.navigate("Login");
     }
   }
 
