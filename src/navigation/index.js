@@ -17,6 +17,7 @@ import {CallScreen} from '../screens/CallScreen';
 import firestore from '@react-native-firebase/firestore';
 import {AuthReducer} from '../redux/store/reducers';
 import { IncommingCallScreen } from '../screens/IncommingCallScreen';
+import TicketDetailScreen from '../screens/TicketDetailScreen';
 import {
     MediaStream,
     RTCPeerConnection,
@@ -410,6 +411,7 @@ export const AppStack = (props) => {
                 <Stack.Screen name="Profile" component={ProfileScreen} initialParams={{onCall: create}} />
                 <Stack.Screen name="All Users" component={AllUsersScreen} />
                 <Stack.Screen name="New User" component={UserCreateScreen} />
+                <Stack.Screen name="Ticket Detail" component={TicketDetailScreen} />
             </Stack.Navigator>
         </>
     )

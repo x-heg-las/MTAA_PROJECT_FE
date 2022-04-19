@@ -58,8 +58,19 @@ export default function ProfileScreen({route, navigation}) {
 
     useEffect(() => {
         fetchProfile();
-        fetchTickets();
+        
     }, [route.params.user_id]);
+    
+    useEffect(() => {
+        fetchTickets();
+        const willFocusSubscription = navigation.addListener('focus', () => {
+            console.log("focus");
+            fetchTickets();
+      });
+  
+      return willFocusSubscription;
+  }, []);
+  
 
     return (
         <SafeAreaView style={GlobalStyle.container}>
@@ -129,7 +140,7 @@ export default function ProfileScreen({route, navigation}) {
             <View style={{flex:1}}>
                 <FlatList
                     data={filter == 'resolved' ? resolved : pending}
-                    renderItem={({item}) =>{console.log(pending); return <TicketCard ticketData={item}/>}}
+                    renderItem={({item}) => <TicketCard onClick={(ticket) => {navigation.navigate("Ticket Detail", {ticket: ticket})}} onUpdate={ fetchTickets} item={item} />}
                 />
             </View>
             </View>

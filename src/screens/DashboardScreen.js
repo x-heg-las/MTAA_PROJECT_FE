@@ -1,38 +1,75 @@
-import { View, Text,StyleSheet, SafeAreaView, FlatList, Modal, ScrollView } from 'react-native'
+import { View,StyleSheet, SafeAreaView, FlatList, Modal, ScrollView } from 'react-native'
 import React, {useState,useEffect, useCallback} from 'react'
 import store from '../redux/store'
 import { useFocusEffect } from '@react-navigation/native';
 import GlobalStyle from '../global/styles/GlobalStyles';
-import {FAB, ToggleButton, Button, ActivityIndicator, Colors, Snackbar, Paragraph, Headline, Subheading, TextInput, Surface} from 'react-native-paper';
+import {FAB, ToggleButton, Button, ActivityIndicator, Colors, Snackbar, Paragraph, Headline, Subheading, TextInput, Surface, Text} from 'react-native-paper';
 import {TicketCard} from '../components/TicketCard';
 import {useSelector} from 'react-redux';
 import {TICKETS} from '../assets/dummy_data';
-import {getTickets} from '../api/apiCalls'
+import {getTickets} from '../api/apiCalls';
+import {TicketModal} from '../components/TicketModal';
 
 export default function DashboardScreen(props) {
 
     //const user = store.getState();
     const [filter, setFilter] = useState('pending');
-    const [requests, setRequests] = useState(TICKETS);
+    const [requests, setRequests] = useState([]);
     const [visible, setVisible] = useState(false);
-    const [answerModal, setAnswerModal] = useState(false);
-    const [answer, setAnswer] = useState('');
-    const [openTicket, setOpenTicket] = useState(TICKETS[0]);
     const [pendingTickets, setPendingTickets] = useState([]);
-    const [allTickets, setAllTickets] = useState([]);
-    const [page, setPage] = useState(1);
+    const [resolvedTickets, setResolvedTickets] = useState([]);
+    const [ticket, setTicket] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
     const user = useSelector(state => state.AuthReducer.userData)
     const [message, setMessage] = useState('');
-    const [description, setDescription] = useState('');
     const serverAddress = useSelector(state => state.SettingsReducer.address);
+    
+    useEffect(() => {
+        fetchData();
+        const willFocusSubscription = props.navigation.addListener('focus', () => {
+            console.log("focus");
+            fetchData();
+      });
+  
+      return willFocusSubscription;
+  }, []);
+
     const fetchData = async () => {
-        //const response = await getTickets(serverAddress);
+        const response = await getTickets(serverAddress);
+        if(response === null) return
+        switch(response.status) {
+            case 401:
+                dispatch(Logout());
+                break;
+            case 200:
+                console.log("ok");
+                console.log(response.body)
+                const allTickets = response.body.items;
+                let resolved = []; let pending = [];
+                allTickets.forEach(e => {
+                    if(e.answered_by_user !== null) {
+                        resolved.push(e);
+                    } else {
+                        pending.push(e);
+                    }
+                });
+                setPendingTickets(pending);
+                setResolvedTickets(resolved);
+                if(filter === 'resolved') {
+                    setRequests(resolved);
+                } else {
+                    setRequests(pending);
+                }
+        }
     }
     
     useEffect(() => {
-        console.log('effect calles');
         fetchData();
-    }, [filter]);
+    }, []);
+
+    const showModal = () =>{
+        setModalVisible(true);
+    }
 
     const onCreateTicket = data => {
         if(data) {
@@ -45,12 +82,21 @@ export default function DashboardScreen(props) {
         fetchData();
     }
 
+    const applyFilter = (value) => {
+        setFilter(value);
+        if(value === 'resolved') {
+            setRequests(resolvedTickets);
+        } else {
+            setRequests(pendingTickets);
+        }
+    }
+
     return (
         <SafeAreaView style={GlobalStyle.container}>
             <View style={[styles.inline, styles.header]}> 
                 <ToggleButton.Group
                     style={styles.inline}
-                    onValueChange={ value => setFilter(value)}
+                    onValueChange={applyFilter}
                     value={filter}
                 >
                     <ToggleButton
@@ -60,10 +106,10 @@ export default function DashboardScreen(props) {
                         value='pending'>
                     </ToggleButton>
                     <ToggleButton
-                        status={filter === 'all' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'all' ? styles.active: null, GlobalStyle.toggleBtn]}
-                        icon={() => <Text>All</Text>} 
-                        value='all'>
+                        status={filter === 'resolved' ? 'checked' : 'unchecked'}
+                        style={[styles.optionBtn, filter === 'resolved' ? styles.active: null, GlobalStyle.toggleBtn]}
+                        icon={() => <Text>Resolved</Text>} 
+                        value='resolved'>
                     </ToggleButton>
                 </ToggleButton.Group>
             </View>
@@ -71,7 +117,7 @@ export default function DashboardScreen(props) {
                 <View>
                     <FlatList
                         data={requests}
-                        renderItem={({item}) => <TicketCard item={item} onUpdate={refreshList} />}
+                        renderItem={({item}) => <TicketCard onClick={(ticket) => {props.navigation.navigate("Ticket Detail", {ticket: ticket})}} onUpdate={fetchData} item={item} />}
                     />
                 </View>
             }
@@ -87,8 +133,9 @@ export default function DashboardScreen(props) {
             >
                 {message}
             </Snackbar>
-           
+            
         </SafeAreaView>
+        
     )
 }
 

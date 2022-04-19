@@ -314,6 +314,7 @@ const postUsers = async (address, params) => {
         .then((result) => {
             const response = JSON.parse(result[1]);
             console.log(response);
+            console.log(response);
             return {
                 status: result[0],
                 body: response

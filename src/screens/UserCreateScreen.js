@@ -15,8 +15,8 @@ import DocumentPicker, {
   } from 'react-native-document-picker';
 
 
-export default function UserCreateScreen() {
-
+export default function UserCreateScreen({navigation}) {
+    const [message, setMessage] = useState();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
@@ -33,7 +33,7 @@ export default function UserCreateScreen() {
             validatePassword() && 
             textValidator(username.trim()) && 
             textValidator(fullName.trim()) &&
-            privilege != null
+            (privilege != null)
         )
     }
 
@@ -60,13 +60,14 @@ export default function UserCreateScreen() {
                 fileUpload = uploadResponse.id;
             }
         }
-
+       
+       
         if(!validateForm()) {
+            console.log("form invalidated")
+            setMessage("Fill in all required forms.");
             setVisible(true);
             return;
         }
-
-        
         const data = {
             "username": username.trim(),
             "profile_img_file": fileUpload,
@@ -74,9 +75,27 @@ export default function UserCreateScreen() {
             "full_name": fullName.trim() || "",
             "phone_number": phoneNumber.trim(),
             "password": password.trim()
+        } 
+        console.log(data)
+        const response = await postUsers(serverAddress, data);
+        if(response == null) {
+            setMessage("Error while createing user");
+            setVisible(true);
+            return;
         }
-        console.log(data);
-        postUsers(serverAddress, userData.username, userData.password, data);
+        switch(response.status) {
+            case 409:
+                setMessage("Username already taken");
+                setVisible(true);
+                return;
+            case 201:
+                navigation.goBack();
+                break;
+            default:
+                setMessage("Some error occurred while creating user");
+                setVisible(true);
+        }
+
         
     }
 
@@ -102,7 +121,7 @@ export default function UserCreateScreen() {
     }, []);
 
     const validatePassword = () => {
-        return !passwordValidator(password.trim())
+        return passwordValidator(password.trim())
     }
 
 
@@ -160,8 +179,8 @@ export default function UserCreateScreen() {
                     onChangeText={setPassword}
                 />
                 {
-                    validatePassword() &&
-                    <HelperText type='error' visible={validatePassword()}>Password must have at least 8 characters</HelperText>
+                    !validatePassword() &&
+                    <HelperText type='error' visible={true}>Password must have at least 8 characters</HelperText>
                 }
                 
                 <TextInput
@@ -209,7 +228,7 @@ export default function UserCreateScreen() {
                         setVisible(false);
                     },
                     }}>
-                    Fill in all required forms.
+                    {message}
                 </Snackbar>   
             </View>
         </SafeAreaView>
