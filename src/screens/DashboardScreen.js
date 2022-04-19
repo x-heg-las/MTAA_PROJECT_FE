@@ -23,16 +23,10 @@ export default function DashboardScreen(props) {
     const [page, setPage] = useState(1);
     const user = useSelector(state => state.AuthReducer.userData)
     const [message, setMessage] = useState('');
+    const [description, setDescription] = useState('');
     const serverAddress = useSelector(state => state.SettingsReducer.address);
     const fetchData = async () => {
         //const response = await getTickets(serverAddress);
-    }
-
-
-    const fetchTicketOwner = async (userId) => {
-        if(userId) {
-
-        }
     }
     
     useEffect(() => {
@@ -47,14 +41,8 @@ export default function DashboardScreen(props) {
         }
     }
 
-    const closeModal = () => {
-        setAnswerModal(false)
-        setAnswer('');
-    }
-
-    const openModal = (ticketData) => {
-        setOpenTicket(ticketData);
-        setAnswerModal(true);
+    const refreshList = () => {
+        fetchData();
     }
 
     return (
@@ -83,7 +71,7 @@ export default function DashboardScreen(props) {
                 <View>
                     <FlatList
                         data={requests}
-                        renderItem={({item}) => <TicketCard ticketData={item} onPress={openModal}/>}
+                        renderItem={({item}) => <TicketCard item={item} onUpdate={refreshList} />}
                     />
                 </View>
             }
@@ -99,40 +87,7 @@ export default function DashboardScreen(props) {
             >
                 {message}
             </Snackbar>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={answerModal}
-                onRequestClose={closeModal}
-                >
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(64, 64, 64, 0.5)', paddingTop: 25}}>
-                 <ScrollView
-                    contentContainerStyle={styles.answerField}
-                 >
-                    <View>
-                        <Headline>{openTicket.title}</Headline>
-                        <Paragraph>{openTicket.description}</Paragraph>
-                        <Subheading>Answer</Subheading>
-                        <TextInput
-                            mode='outlined'
-                            placeholder="This question is not answered yet."
-                            multiline={true}
-                            value={answer}
-                            onChangeText={setAnswer}
-                        ></TextInput>
-                        <Button onPress={closeModal}>Cancel</Button>
-                        <Button
-                            onPress={() => { 
-                                if(answer.length == 0) {
-                                    setMessage("Fill in message");
-                                    setVisible(true);
-                                }
-                            }}
-                        >Submit</Button>
-                    </View>
-                    </ScrollView>
-                </View>
-            </Modal>
+           
         </SafeAreaView>
     )
 }
@@ -150,19 +105,12 @@ const styles = StyleSheet.create({
     },
     header:{
         
-        marginBottom: 50,
     },
     fab:{
         position: 'absolute',
         margin: 16,
         right: 0,
         bottom: 0,
-    },
-    modalView:{
-        flex:1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        verticalAlign: 'middle',
     },
     answerField: {
         padding: 25,

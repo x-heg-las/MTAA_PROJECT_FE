@@ -1,11 +1,22 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import {userLogin} from '../../api/apiCalls'
 export const Init = () => {
     
     return async dispatch => {
         console.log("init fetching..."); 
-        const token = "toktok";
         let serverAddress = await AsyncStorage.getItem('server_address');
+        const username = await AsyncStorage.getItem("username");   
+        const password = await AsyncStorage.getItem('password');
+        let userData = null;
+        let loginAction = null;
+        if(username && password) {
+            loginAction = await userLogin(serverAddress, username, password);
+        }
+
+        if(loginAction && loginAction.status === 200) {
+            userData = {...loginAction.body, password: password};
+        }
+    
         if(serverAddress) {
             console.log(serverAddress);
             Promise.resolve(
@@ -16,7 +27,8 @@ export const Init = () => {
                 })).then(() =>
                     dispatch ({
                         type: 'LOGIN',
-                        userData: null 
+                        payload: null,
+                        userData: userData ? {...userData, password : password} : null,
                     })
                 )
         } else {
@@ -31,6 +43,8 @@ export const Init = () => {
 
 export const Login = (userData, password) => {
     return async dispatch => {
+        await AsyncStorage.setItem('username', userData.username);
+        await AsyncStorage.setItem('password', password);
         const token = userData.username + ":" + userData.password;
    
         dispatch ({
@@ -42,10 +56,15 @@ export const Login = (userData, password) => {
 }
 
 export const Logout = () => {
-    return({
+    return async dispatch =>  {
+        await AsyncStorage.removeItem('username');
+        await AsyncStorage.removeItem('password');
+     dispatch({
         type: 'LOGOUT',
         payload: null,
-    })
+        userData: null
+     });
+    }
 }
 
 export const RegisterServer = (address) => {

@@ -408,7 +408,6 @@ export const AppStack = (props) => {
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} initialParams={{onCall: create}} />
-
                 <Stack.Screen name="All Users" component={AllUsersScreen} />
                 <Stack.Screen name="New User" component={UserCreateScreen} />
             </Stack.Navigator>
@@ -417,7 +416,7 @@ export const AppStack = (props) => {
 }
 
 const RootNavigator = (props) => {
-    const token = useSelector(state => state.AuthReducer.authToken);
+    const token = useSelector(state => state.AuthReducer.userData);
 
     return (
         

@@ -15,7 +15,7 @@ export function LoginScreen({navigation}) {
   const serverAddress = useSelector(state => state.SettingsReducer.address);
   
   useEffect(() => {
-    //dispatch(Init());
+    dispatch(Init());
   }, [])
 
   const onLoginPressed = async () => {
