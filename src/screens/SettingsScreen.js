@@ -59,16 +59,7 @@ export default function SettingsScreen(props) {
       >
         Save  
       </Button>
-      {
-        (loggedUser != null) && 
-        <Button
-        mode='contained'
-        style={styles.removeBtn}
-        onPress={onDeleteProfile}
-      >
-        Delete profile
-      </Button>
-      }
+     
     </SafeAreaView>
   )
 }

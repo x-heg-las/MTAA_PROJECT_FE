@@ -23,6 +23,7 @@ export default function DashboardScreen(props) {
     const user = useSelector(state => state.AuthReducer.userData)
     const [message, setMessage] = useState('');
     const serverAddress = useSelector(state => state.SettingsReducer.address);
+    const [refreshing, setRefreshing] = useState(false);
     const filter = useRef('pending');
 
     useEffect(() => {
@@ -36,11 +37,13 @@ export default function DashboardScreen(props) {
   }, []);
 
     const fetchData = async () => {
+        setRefreshing(true);
         const response = await getTickets(serverAddress);
         if(response === null) return
         switch(response.status) {
             case 401:
                 dispatch(Logout());
+                setRefreshing(false);
                 break;
             case 200:
                 console.log("ok");
@@ -62,6 +65,7 @@ export default function DashboardScreen(props) {
                 } else {
                     setRequests(pending);
                 }
+                setRefreshing(false);
         }
     }
     
@@ -116,7 +120,9 @@ export default function DashboardScreen(props) {
             {
                 <View>
                     <FlatList
+                        onRefresh={fetchData}
                         data={requests}
+                        refreshing={refreshing}
                         renderItem={({item}) => <TicketCard onClick={(ticket) => {props.navigation.navigate("Ticket Detail", {ticket: ticket})}} onUpdate={fetchData} item={item} />}
                     />
                 </View>

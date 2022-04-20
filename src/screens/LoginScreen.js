@@ -3,7 +3,7 @@ import { StyleSheet, View, Image, TextInput, SafeAreaView } from "react-native";
 import { Button, Snackbar } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers, userLogin } from "../api/apiCalls"
-import { Init, Login } from "../redux/store/actions"
+import { Init, Login,Logout } from "../redux/store/actions"
 
 
 export function LoginScreen({navigation}) {
@@ -15,11 +15,17 @@ export function LoginScreen({navigation}) {
   const serverAddress = useSelector(state => state.SettingsReducer.address);
   
   useEffect(() => {
-    dispatch(Init());
+    try{
+      dispatch(Init());
+      //dispatch(Logout());
+    } catch {
+      console.log("eerr thrown");
+      dispatch(Logout());
+    }
   }, [])
 
   const onLoginPressed = async () => {
-
+    try{
     userLogin(serverAddress, username, password).then(response => {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
       if(response == null) {return;}
@@ -42,6 +48,9 @@ export function LoginScreen({navigation}) {
       }
  
     });
+  } catch (err) {
+    dispatch(Logout());
+  }
 }
 
   return (

@@ -99,17 +99,6 @@ export  default function TicketDetailScreen({route, navigation}) {;
                         }}
                     >Submit</Button>
                 }
-                {
-                    (route.params.ticket.file || true) &&
-                    <Button onPress={async() =>{
-                        await getTokens(serverAddress, loggedUser.username, loggedUser.password);
-                        const token = await AsyncStorage.getItem('accessToken');
-                    }
-                        
-                    }>
-                        Download 
-                    </Button>
-                }
             </View>
             </ScrollView>
         </SafeAreaView>

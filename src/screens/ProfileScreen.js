@@ -23,6 +23,7 @@ export default function ProfileScreen({route, navigation}) {
 
     const fetchTickets = async () => {
         const response = await getTickets(serverAddress, {user_id: route.params.user_id});
+        if(response == null) return;
         switch(response.status) {
             case 401:
                 dispatch(Logout());
@@ -41,6 +42,7 @@ export default function ProfileScreen({route, navigation}) {
 
     const fetchProfile = async () => {
         const response = await getUsers(serverAddress, {id: route.params.user_id});
+        if(response == null) return;
         switch (response.status) {
             case 200:
                 setUserData(response.body);
@@ -60,7 +62,7 @@ export default function ProfileScreen({route, navigation}) {
         fetchProfile();
         
     }, [route.params.user_id]);
-    
+
     useEffect(() => {
         fetchTickets();
         const willFocusSubscription = navigation.addListener('focus', () => {

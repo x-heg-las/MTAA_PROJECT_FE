@@ -11,13 +11,14 @@ import {getUsers, putTickets, deleteTickets} from '../api/apiCalls';
 
 export function TicketCard({item, onUpdate, onClick}) {
     const serverAddress = useSelector(state => state.SettingsReducer.address);
+    const loggedUser = useSelector(state => state.AuthReducer.userData);
     const canUpdate = () => {
         if(loggedUser && loggedUser.id === item.user) return true;
         return false;
     }
 
     const canDelete = () => {
-        if(loggedUser && loggedUser.user_type__name) return true;
+        if(loggedUser && loggedUser.user_type__name === 'admin') return true;
         if(loggedUser && loggedUser.id === item.user) return true;
         return false;
     }
@@ -64,7 +65,7 @@ export function TicketCard({item, onUpdate, onClick}) {
                             color={'red'}
                             size={20}
                             onPress={() => {deleteTicket(item.id)}}
-                            disabled={!canDelete}
+                            disabled={() => !canDelete()}
                         /> 
                     </View>
                 </View>

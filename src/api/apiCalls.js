@@ -117,8 +117,12 @@ const getUsers = async (address, params={}) => {
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
         .then((result) => {
-            const response = JSON.parse(result[1]);
-            console.log(response);
+            let response = null;
+
+            if(result[0] === 200)
+                response = JSON.parse(result[1]);   
+
+                console.log(response);
             return {
                 status: result[0],
                 body: response
@@ -135,12 +139,16 @@ const getUsers = async (address, params={}) => {
                 })
                 .then((res) => {return Promise.all([res.status, res.text()])})
                 .then((result) => {
-                    const response = JSON.parse(result[1]);
-                    console.log(response);
-                    return {
-                        status: result[0],
-                        body: response
-                    }
+                    let response = null;
+
+            if(result[0] === 200)
+                response = JSON.parse(result[1]);   
+
+                console.log(response);
+            return {
+                status: result[0],
+                body: response
+            }
                 }
             );
         }
@@ -163,8 +171,13 @@ const getTickets = async (address, params={}) => {
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
         .then((result) => {
-            const response = JSON.parse(result[1]);
-            console.log(response);
+
+            let response = null;
+
+            if(result[0] === 200)
+                response = JSON.parse(result[1]);   
+
+                console.log(response);
             return {
                 status: result[0],
                 body: response
@@ -181,12 +194,16 @@ const getTickets = async (address, params={}) => {
             })
             .then((res) => {return Promise.all([res.status, res.text()])})
             .then((result) => {
-                const response = JSON.parse(result[1]);
+                let response = null;
+
+            if(result[0] === 200)
+                response = JSON.parse(result[1]);   
+
                 console.log(response);
-                return {
-                    status: result[0],
-                    body: response
-                }
+            return {
+                status: result[0],
+                body: response
+            }
             }
             );
         }
@@ -212,8 +229,12 @@ const putUsers = async (address, params) => {
         })
         .then((res) => {return Promise.all([res.status, res.text()])})
         .then((result) => {
-            const response = JSON.parse(result[1]);
-            console.log(response);
+            let response = null;
+
+            if(result[0] === 200)
+                response = JSON.parse(result[1]);   
+
+                console.log(response);
             return {
                 status: result[0],
                 body: response

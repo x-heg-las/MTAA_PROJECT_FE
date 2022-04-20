@@ -9,11 +9,20 @@ export const Init = () => {
         const password = await AsyncStorage.getItem('password');
         let userData = null;
         let loginAction = null;
+        try{
         if(username && password) {
             loginAction = await userLogin(serverAddress, username, password);
         }
-
-        if(loginAction && loginAction.status === 200) {
+    } catch(er) {
+        console.log("init failed")
+        dispatch ({
+            type: 'LOGIN',
+            payload: null,
+            userData:  null,
+        })
+    }
+        if(username && password && loginAction && loginAction.status === 200) {
+            console.log("fetching userdata...");   
             userData = {...loginAction.body, password: password};
         }
     
@@ -36,6 +45,7 @@ export const Init = () => {
             dispatch ({
                 type: 'LOGIN',
                 payload: null,
+                userData: null,
             });
         }
     }

@@ -142,7 +142,7 @@ export const AppStack = (props) => {
                     if(change.type == 'removed') {
                         hangup();
                     }
-                    console.warn("toto niee");
+                   
                     setCallroom(null);
                 });
                 
@@ -176,7 +176,7 @@ export const AppStack = (props) => {
             const data = snapshot.data();
             //starts call on answer
             if(pc.current && !pc.current.remoteDesription && data && data.answer) {
-                console.warn("setting answer");
+                
                 pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
             }
             
@@ -193,7 +193,6 @@ export const AppStack = (props) => {
             s.docChanges().forEach((change) => {
                 if(change.type == 'removed') {
                     hangup();
-                    console.warn("toto niee");
                     setCallroom(null);
                 }
                 
@@ -279,7 +278,7 @@ export const AppStack = (props) => {
                 const data = snapshot.data();
                 //starts call on answer
                 if(pc.current && !pc.current.remoteDesription && data && data.answer) {
-                    console.warn("setting answer");
+                    
                     pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
                 }
                 
@@ -293,7 +292,7 @@ export const AppStack = (props) => {
                 s.docChanges().forEach((change) => {
                     if(change.type == 'removed') {
                         hangup();
-                        console.warn("toto niee");
+                        
                         setCallroom(null);
                     }
                     
@@ -317,10 +316,9 @@ export const AppStack = (props) => {
             await setupWebrtc();
             
             collectIceCandidates(cRef,  'callee', 'caller');
-            console.warn("Offer: "+offer);
+           
             if(pc.current) {
-                
-                console.warn(chatId);
+
                  pc.current.setRemoteDescription(new RTCSessionDescription(offer)).catch(e => console.error(e));
                 const answer = await pc.current.createAnswer();
                 pc.current.setLocalDescription(answer);
