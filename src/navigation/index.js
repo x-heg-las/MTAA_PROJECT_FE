@@ -328,7 +328,7 @@ export const AppStack = (props) => {
                         sdp: answer.sdp,
                     },
                 };
-                cRef.update(cWithAnswer).catch(e => console.error("rejectt"));
+                cRef.update(cWithAnswer).catch(e => console.error("answer rejected"));
             }
         }
     }

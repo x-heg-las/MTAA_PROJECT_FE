@@ -223,7 +223,7 @@ export default function UserCreateScreen({navigation}) {
                     onDismiss={() => setVisible(false)}
                     duration={3000}
                     action={{
-                    label: 'Undo',
+                    label: 'Close',
                     onPress: () => {
                         setVisible(false);
                     },
