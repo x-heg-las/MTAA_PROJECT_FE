@@ -31,6 +31,8 @@ export function LoginScreen({navigation}) {
       if(response == null) {return;}
       switch(response.status) {
         case 200:
+          console.log(response.body);
+          console.log("loging in type " + response.body.uer_type__name)
           dispatch(Login(response.body, password));
           getUsers(serverAddress);
           break;

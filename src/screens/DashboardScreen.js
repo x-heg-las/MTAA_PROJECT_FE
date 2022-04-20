@@ -39,7 +39,7 @@ export default function DashboardScreen(props) {
     const fetchData = async () => {
         setRefreshing(true);
         const response = await getTickets(serverAddress);
-        if(response === null) return
+        if(response === null) { setRefreshing(false);return; }
         switch(response.status) {
             case 401:
                 dispatch(Logout());
@@ -67,6 +67,7 @@ export default function DashboardScreen(props) {
                 }
                 setRefreshing(false);
         }
+        setRefreshing(false);
     }
     
     useEffect(() => {

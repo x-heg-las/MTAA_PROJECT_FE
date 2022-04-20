@@ -12,15 +12,24 @@ export  default function TicketDetailScreen({route, navigation}) {;
     const timestamp = new Date(route.params.ticket.updated_at).toString();
     const serverAddress = useSelector(state => state.SettingsReducer.address);
     const loggedUser = useSelector(state => state.AuthReducer.userData);
+    const [mayAnswer, setCanAnswer] = useState(false);
+    const [mayUpdate, setMayUpdate] = useState(false);
 
-
-    const submitChanges = async (id, question, answer) => {
-        const data = {
+    const submitChanges = async (id, question, answer, questionUpdate) => {
+        let data = {
             id: id,
             description: question,
             answer: answer,
             answered_by_user: loggedUser.id
         };
+
+        if(questionUpdate) {
+            data = {
+                id: id,
+                description: question,
+            }
+        }
+        
         const result = await putTickets(serverAddress, data);
         if(result == null) {return;} //show something
         switch(result.status) {
@@ -33,7 +42,9 @@ export  default function TicketDetailScreen({route, navigation}) {;
 
     useEffect(() => {
         getUserData();
-        
+       
+        setCanAnswer(canAnswer);
+        setMayUpdate(canUpdate);
     }, [route.params.ticket.id]);
 
     const canUpdate = () => {
@@ -42,8 +53,8 @@ export  default function TicketDetailScreen({route, navigation}) {;
     }
 
     const canAnswer = () => {
-        if(loggedUser && loggedUser.user_type__name) return true;
-        if(loggedUser && loggedUser.user_type__name === 'support') return true;
+        if((loggedUser.user_type__name.localeCompare("admin") == 0)) return true;
+        if(loggedUser && (loggedUser.user_type__name.localeCompare('support') == 0)) return true;
         return false;
     }
     
@@ -88,14 +99,15 @@ export  default function TicketDetailScreen({route, navigation}) {;
                     multiline={true}
                     value={route.params.ticket.answer}
                     onChangeText={setAnswer}
-                    disabled={!canAnswer()}
+                    disabled={!mayAnswer}
                 ></TextInput>
+                <Text>Video-conference required: {route.params.ticket.call_requested ? 'yes' : 'no'}</Text>
                 <Button onPress={() => navigation.goBack()}>Cancel</Button>
                 {
-                    (canUpdate() || canAnswer()) &&
+                    (mayUpdate || mayAnswer) &&
                     <Button
                         onPress={() => { 
-                            submitChanges(route.params.ticket.id, description, answer)
+                            submitChanges(route.params.ticket.id, description, answer, loggedUser.id == route.params.ticket.user)
                         }}
                     >Submit</Button>
                 }

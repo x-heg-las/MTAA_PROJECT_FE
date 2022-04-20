@@ -10,6 +10,7 @@ import {getUsers, putTickets, deleteTickets} from '../api/apiCalls';
 
 
 export function TicketCard({item, onUpdate, onClick}) {
+    const [mayDelete, setMayDelete] = useState(false);
     const serverAddress = useSelector(state => state.SettingsReducer.address);
     const loggedUser = useSelector(state => state.AuthReducer.userData);
     const canUpdate = () => {
@@ -18,14 +19,15 @@ export function TicketCard({item, onUpdate, onClick}) {
     }
 
     const canDelete = () => {
-        if(loggedUser && loggedUser.user_type__name === 'admin') return true;
+        console.log("can delete " + loggedUser)
+        if(loggedUser && loggedUser.user_type__name.trim().localeCompare("admin") == 0) return true;
         if(loggedUser && loggedUser.id === item.user) return true;
         return false;
     }
 
     const canAnswer = () => {
         if(loggedUser && loggedUser.user_type__name) return true;
-        if(loggedUser && loggedUser.user_type__name === 'support') return true;
+        if(loggedUser && loggedUser.user_type__name.localeCompare('support') == 0) return true;
         return false;
     }
     
@@ -43,7 +45,9 @@ export function TicketCard({item, onUpdate, onClick}) {
         }
     }
 
-    
+    useEffect(() => {
+        setMayDelete(canDelete);
+    },[item])
 
 
 
@@ -65,7 +69,7 @@ export function TicketCard({item, onUpdate, onClick}) {
                             color={'red'}
                             size={20}
                             onPress={() => {deleteTicket(item.id)}}
-                            disabled={() => !canDelete()}
+                            disabled={!mayDelete}
                         /> 
                     </View>
                 </View>
