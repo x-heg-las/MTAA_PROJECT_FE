@@ -17,6 +17,7 @@ import {CallScreen} from '../screens/CallScreen';
 import firestore from '@react-native-firebase/firestore';
 import {AuthReducer} from '../redux/store/reducers';
 import { IncommingCallScreen } from '../screens/IncommingCallScreen';
+import TicketDetailScreen from '../screens/TicketDetailScreen';
 import {
     MediaStream,
     RTCPeerConnection,
@@ -52,12 +53,13 @@ const NavigationBar = ({user, navigation, back}) => {
             <View style={{ flex: 1 }}>
                 {
                     userData && 
+
                     <View>
-                        <Menu.Item title="Profile" onPress={() => { 
-                            navigation.navigate("Profile", {user_id: userData.id});
+                        <Menu.Item title="Dashboard" onPress={() => {navigation.navigate("Dashboard"); closeMenu()}} />
+                        <Menu.Item title="My profile" onPress={() => { 
+                            navigation.navigate("Profile",  {user_id: userData.id})
                             closeMenu();
                         }}/>
-                        <Menu.Item title="My organisation"/> 
                     </View>
                 }
                 {
@@ -70,7 +72,7 @@ const NavigationBar = ({user, navigation, back}) => {
                     </View>
                 }
                 {
-                    //(userData && userData.user_type__name === 'admin') &&
+                    (userData && userData.user_type__name === 'admin') &&
                     <View>
                         <Menu.Item onPress={() => {
                                 navigation.navigate("New User");
@@ -87,7 +89,6 @@ const NavigationBar = ({user, navigation, back}) => {
                     userData && 
                     <Menu.Item onPress={() => {dispatch(Logout())}} title="Logout"/>
                 }
-                <Menu.Item title="About {not yet :D}"/>
             </View>
             </Menu>
         </Appbar.Header>
@@ -141,7 +142,7 @@ export const AppStack = (props) => {
                     if(change.type == 'removed') {
                         hangup();
                     }
-                    console.warn("toto niee");
+                   
                     setCallroom(null);
                 });
                 
@@ -175,7 +176,7 @@ export const AppStack = (props) => {
             const data = snapshot.data();
             //starts call on answer
             if(pc.current && !pc.current.remoteDesription && data && data.answer) {
-                console.warn("setting answer");
+                
                 pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
             }
             
@@ -192,7 +193,6 @@ export const AppStack = (props) => {
             s.docChanges().forEach((change) => {
                 if(change.type == 'removed') {
                     hangup();
-                    console.warn("toto niee");
                     setCallroom(null);
                 }
                 
@@ -239,7 +239,7 @@ export const AppStack = (props) => {
     const create = async (chatId = 'chatId') => {
 
         setCurrentChatId(chatId);
-        console.log("create called with : "  + chatId);
+        console.log("create called with : "  + chatId + "   " + userData.username); ;
         if (chatId === null || chatId === userData.username) { return }
 
         console.log("Calling ");
@@ -278,7 +278,7 @@ export const AppStack = (props) => {
                 const data = snapshot.data();
                 //starts call on answer
                 if(pc.current && !pc.current.remoteDesription && data && data.answer) {
-                    console.warn("setting answer");
+                    
                     pc.current.setRemoteDescription(new RTCSessionDescription(data.answer));
                 }
                 
@@ -292,7 +292,7 @@ export const AppStack = (props) => {
                 s.docChanges().forEach((change) => {
                     if(change.type == 'removed') {
                         hangup();
-                        console.warn("toto niee");
+                        
                         setCallroom(null);
                     }
                     
@@ -316,10 +316,9 @@ export const AppStack = (props) => {
             await setupWebrtc();
             
             collectIceCandidates(cRef,  'callee', 'caller');
-            console.warn("Offer: "+offer);
+           
             if(pc.current) {
-                
-                console.warn(chatId);
+
                  pc.current.setRemoteDescription(new RTCSessionDescription(offer)).catch(e => console.error(e));
                 const answer = await pc.current.createAnswer();
                 pc.current.setLocalDescription(answer);
@@ -329,7 +328,7 @@ export const AppStack = (props) => {
                         sdp: answer.sdp,
                     },
                 };
-                cRef.update(cWithAnswer).catch(e => console.error("rejectt"));
+                cRef.update(cWithAnswer).catch(e => console.error("answer rejected"));
             }
         }
     }
@@ -410,16 +409,16 @@ export const AppStack = (props) => {
                 <Stack.Screen name="Settings" component={SettingsScreen} />
                 <Stack.Screen name="New Ticket" component={TicketCreateScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} initialParams={{onCall: create}} />
-
                 <Stack.Screen name="All Users" component={AllUsersScreen} />
                 <Stack.Screen name="New User" component={UserCreateScreen} />
+                <Stack.Screen name="Ticket Detail" component={TicketDetailScreen} />
             </Stack.Navigator>
         </>
     )
 }
 
 const RootNavigator = (props) => {
-    const token = useSelector(state => state.AuthReducer.authToken);
+    const token = useSelector(state => state.AuthReducer.userData);
 
     return (
         

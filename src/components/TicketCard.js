@@ -1,28 +1,82 @@
-import { View, StyleSheet } from 'react-native'
-import React, {useEffect} from 'react'
-import {Card, Title, Text} from 'react-native-paper'
+import { View, StyleSheet, Modal, ScrollView } from 'react-native'
+import React, {useEffect, useState} from 'react'
+import {Card, Title, Text, IconButton, Button, TextInput,Headline, Subheading} from 'react-native-paper'
 import {TICKETS} from '../assets/dummy_data'
 import { STATUS_RESOLVED, STATUS_PENDING } from '../global/constants/Constants'
+import GlobalStyle from '../global/styles/GlobalStyles';
+import {AuthReducer, SettingsReducer} from '../redux/store/reducers';
+import {useSelector} from 'react-redux';
+import {getUsers, putTickets, deleteTickets} from '../api/apiCalls';
 
-export function TicketCard({ticketData, onPress}) {
+
+export function TicketCard({item, onUpdate, onClick}) {
+    const [mayDelete, setMayDelete] = useState(false);
+    const serverAddress = useSelector(state => state.SettingsReducer.address);
+    const loggedUser = useSelector(state => state.AuthReducer.userData);
+    const canUpdate = () => {
+        if(loggedUser && loggedUser.id === item.user) return true;
+        return false;
+    }
+
+    const canDelete = () => {
+        console.log("can delete " + loggedUser)
+        if(loggedUser && loggedUser.user_type__name.trim().localeCompare("admin") == 0) return true;
+        if(loggedUser && loggedUser.id === item.user) return true;
+        return false;
+    }
+
+    const canAnswer = () => {
+        if(loggedUser && loggedUser.user_type__name) return true;
+        if(loggedUser && loggedUser.user_type__name.localeCompare('support') == 0) return true;
+        return false;
+    }
     
-    console.log("tick tick" + ticketData); 
+
+    const deleteTicket = async (id) => {
+        const result = await deleteTickets(serverAddress,{id: id});
+        if(result == null) {return;}//show something
+        switch(result.status) {
+            case 204:
+               
+                onUpdate();
+                break;
+            case 404:
+               
+        }
+    }
+
+    useEffect(() => {
+        setMayDelete(canDelete);
+    },[item])
+
+
 
     return (
-        <Card onPress={() => onPress(ticketData)}>
+        <Card onPress={() => {onClick(item)} }>
             <Card.Content>
                 <View style={[styles.container]}>
                     <View style={[styles.row]}>
-                        <Text>{ticketData.title}</Text>
-                        <Text>{new Date(ticketData.created_at).toDateString()}</Text>
+                        <Text>{item.title}</Text>
+                        <Text>{new Date(item.created_at).toDateString()}</Text>
                     </View>
                     <View  style={[styles.row]}>
-                        <Text>Author: {ticketData.user}</Text>
-                        <Text>Status: {ticketData.answered_by_user ? STATUS_RESOLVED : STATUS_PENDING}</Text>
+                        <Text>Subject: {item.request_type__name}</Text>
+                        <Text>Status: {item.answered_by_user ? STATUS_RESOLVED : STATUS_PENDING}</Text>
+                    </View>
+                    <View style={[GlobalStyle.inline, styles.controls]}>
+                        <IconButton
+                            icon="delete"
+                            color={'red'}
+                            size={20}
+                            onPress={() => {deleteTicket(item.id)}}
+                            disabled={!mayDelete}
+                        /> 
                     </View>
                 </View>
+                
             </Card.Content>
         </Card>
+        
     )
 }
 
@@ -34,5 +88,22 @@ const styles = StyleSheet.create({
     },
     container:{
         flexDirection: 'column'
+    },
+    controls: {
+        direction: 'ltr',
+        justifyContent: 'flex-end',
+    },
+    modalView:{
+        flex:1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        verticalAlign: 'middle',
+    },
+    answerField: {
+        padding: 25,
+        backgroundColor: 'white'
+    },
+    textInpuField: {
+        fontSize:14
     }
 })

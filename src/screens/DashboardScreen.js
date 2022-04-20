@@ -1,44 +1,82 @@
-import { View, Text,StyleSheet, SafeAreaView, FlatList, Modal, ScrollView } from 'react-native'
-import React, {useState,useEffect, useCallback} from 'react'
+import { View,StyleSheet, SafeAreaView, FlatList, Modal, ScrollView } from 'react-native'
+import React, {useState,useEffect, useCallback, useRef} from 'react'
 import store from '../redux/store'
 import { useFocusEffect } from '@react-navigation/native';
 import GlobalStyle from '../global/styles/GlobalStyles';
-import {FAB, ToggleButton, Button, ActivityIndicator, Colors, Snackbar, Paragraph, Headline, Subheading, TextInput, Surface} from 'react-native-paper';
+import {FAB, ToggleButton, Button, ActivityIndicator, Colors, Snackbar, Paragraph, Headline, Subheading, TextInput, Surface, Text} from 'react-native-paper';
 import {TicketCard} from '../components/TicketCard';
 import {useSelector} from 'react-redux';
 import {TICKETS} from '../assets/dummy_data';
-import {getTickets} from '../api/apiCalls'
+import {getTickets} from '../api/apiCalls';
+import {TicketModal} from '../components/TicketModal';
 
 export default function DashboardScreen(props) {
 
     //const user = store.getState();
-    const [filter, setFilter] = useState('pending');
-    const [requests, setRequests] = useState(TICKETS);
+   //const [filter, setFilter] = useState('pending');
+    const [requests, setRequests] = useState([]);
     const [visible, setVisible] = useState(false);
-    const [answerModal, setAnswerModal] = useState(false);
-    const [answer, setAnswer] = useState('');
-    const [openTicket, setOpenTicket] = useState(TICKETS[0]);
     const [pendingTickets, setPendingTickets] = useState([]);
-    const [allTickets, setAllTickets] = useState([]);
-    const [page, setPage] = useState(1);
+    const [resolvedTickets, setResolvedTickets] = useState([]);
+    const [ticket, setTicket] = useState(null);
+    const [modalVisible, setModalVisible] = useState(false);
     const user = useSelector(state => state.AuthReducer.userData)
     const [message, setMessage] = useState('');
     const serverAddress = useSelector(state => state.SettingsReducer.address);
+    const [refreshing, setRefreshing] = useState(false);
+    const filter = useRef('pending');
+
+    useEffect(() => {
+        fetchData();
+        const willFocusSubscription = props.navigation.addListener('focus', () => {
+            console.log("focus");
+            fetchData();
+      });
+  
+      return willFocusSubscription;
+  }, []);
+
     const fetchData = async () => {
-        //const response = await getTickets(serverAddress);
-    }
-
-
-    const fetchTicketOwner = async (userId) => {
-        if(userId) {
-
+        setRefreshing(true);
+        const response = await getTickets(serverAddress);
+        if(response === null) { setRefreshing(false);return; }
+        switch(response.status) {
+            case 401:
+                dispatch(Logout());
+                setRefreshing(false);
+                break;
+            case 200:
+                console.log("ok");
+                console.log(response.body)
+                const allTickets = response.body.items;
+                let resolved = []; let pending = [];
+                allTickets.forEach(e => {
+                    if(e.answered_by_user != null) {
+                        resolved.push(e);
+                    } else {
+                        pending.push(e);
+                    }
+                });
+                setPendingTickets(pending);
+                setResolvedTickets(resolved);
+                console.log("filter: " + filter);
+                if(filter.current === 'resolved') {
+                    setRequests(resolved);
+                } else {
+                    setRequests(pending);
+                }
+                setRefreshing(false);
         }
+        setRefreshing(false);
     }
     
     useEffect(() => {
-        console.log('effect calles');
         fetchData();
-    }, [filter]);
+    }, []);
+
+    const showModal = () =>{
+        setModalVisible(true);
+    }
 
     const onCreateTicket = data => {
         if(data) {
@@ -47,14 +85,15 @@ export default function DashboardScreen(props) {
         }
     }
 
-    const closeModal = () => {
-        setAnswerModal(false)
-        setAnswer('');
-    }
-
-    const openModal = (ticketData) => {
-        setOpenTicket(ticketData);
-        setAnswerModal(true);
+    const applyFilter = (value) => {
+        //setFilter(value);
+        filter.current = value;
+        console.log("applying filters");
+        if(value === 'resolved') {
+            setRequests(resolvedTickets);
+        } else {
+            setRequests(pendingTickets);
+        }
     }
 
     return (
@@ -62,28 +101,30 @@ export default function DashboardScreen(props) {
             <View style={[styles.inline, styles.header]}> 
                 <ToggleButton.Group
                     style={styles.inline}
-                    onValueChange={ value => setFilter(value)}
-                    value={filter}
+                    onValueChange={applyFilter}
+                    value={filter.current}
                 >
                     <ToggleButton
-                        status={filter === 'pending' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'pending' ? styles.active: null, GlobalStyle.toggleBtn]}
+                        status={filter.current === 'pending' ? 'checked' : 'unchecked'}
+                        style={[styles.optionBtn, filter.current === 'pending' ? styles.active: null, GlobalStyle.toggleBtn]}
                         icon={() => <Text>Pending</Text>}
                         value='pending'>
                     </ToggleButton>
                     <ToggleButton
-                        status={filter === 'all' ? 'checked' : 'unchecked'}
-                        style={[styles.optionBtn, filter === 'all' ? styles.active: null, GlobalStyle.toggleBtn]}
-                        icon={() => <Text>All</Text>} 
-                        value='all'>
+                        status={filter.current === 'resolved' ? 'checked' : 'unchecked'}
+                        style={[styles.optionBtn, filter.current === 'resolved' ? styles.active: null, GlobalStyle.toggleBtn]}
+                        icon={() => <Text>Resolved</Text>} 
+                        value='resolved'>
                     </ToggleButton>
                 </ToggleButton.Group>
             </View>
             {
                 <View>
                     <FlatList
+                        onRefresh={fetchData}
                         data={requests}
-                        renderItem={({item}) => <TicketCard ticketData={item} onPress={openModal}/>}
+                        refreshing={refreshing}
+                        renderItem={({item}) => <TicketCard onClick={(ticket) => {props.navigation.navigate("Ticket Detail", {ticket: ticket})}} onUpdate={fetchData} item={item} />}
                     />
                 </View>
             }
@@ -99,41 +140,9 @@ export default function DashboardScreen(props) {
             >
                 {message}
             </Snackbar>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={answerModal}
-                onRequestClose={closeModal}
-                >
-                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(64, 64, 64, 0.5)', paddingTop: 25}}>
-                 <ScrollView
-                    contentContainerStyle={styles.answerField}
-                 >
-                    <View>
-                        <Headline>{openTicket.title}</Headline>
-                        <Paragraph>{openTicket.description}</Paragraph>
-                        <Subheading>Answer</Subheading>
-                        <TextInput
-                            mode='outlined'
-                            placeholder="This question is not answered yet."
-                            multiline={true}
-                            value={answer}
-                            onChangeText={setAnswer}
-                        ></TextInput>
-                        <Button onPress={closeModal}>Cancel</Button>
-                        <Button
-                            onPress={() => { 
-                                if(answer.length == 0) {
-                                    setMessage("Fill in message");
-                                    setVisible(true);
-                                }
-                            }}
-                        >Submit</Button>
-                    </View>
-                    </ScrollView>
-                </View>
-            </Modal>
+            
         </SafeAreaView>
+        
     )
 }
 
@@ -150,19 +159,12 @@ const styles = StyleSheet.create({
     },
     header:{
         
-        marginBottom: 50,
     },
     fab:{
         position: 'absolute',
         margin: 16,
         right: 0,
         bottom: 0,
-    },
-    modalView:{
-        flex:1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        verticalAlign: 'middle',
     },
     answerField: {
         padding: 25,

@@ -1,6 +1,6 @@
 import { 
     View,
-    Text,
+    StyleSheet,
     SafeAreaView
 } from 'react-native'
 import React, { useState } from 'react'
@@ -8,32 +8,50 @@ import React, { useState } from 'react'
 
 import { useNavigation } from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
-import {RegisterServer} from '../redux/store/actions'
+import {RegisterServer, Logout} from '../redux/store/actions'
 import { 
   TextInput,
   Button,
-
+  Subheading
 } from 'react-native-paper';
+import {AuthReducer} from '../redux/store/reducers';
+import GlobalStyle from '../global/styles/GlobalStyles'
+import {deleteUsers} from '../api/apiCalls';
 
 export default function SettingsScreen(props) {
   const dispatch = useDispatch();
   const serverAddress = useSelector((state) => state.SettingsReducer.address);
   const [address, setAddress] = useState(serverAddress || '' );
+  const loggedUser = useSelector(state => state.AuthReducer.userData);
   const navigation = useNavigation();
+
 
   const SaveSettings = () => {
     dispatch(RegisterServer(address));
     navigation.goBack();
   }
 
+
+  const onDeleteProfile = async () => {
+    if(loggedUser == null || loggedUser.id == null) return
+    const result = await deleteUsers(serverAddress, {id: loggedUser.id});
+    if(result == null) return;
+    switch(result.status) {
+      default:
+       dispatch(Logout());
+       navigation.navigate("Login");
+    }
+  }
+
   return (
-    <SafeAreaView>
-      <Text>Data provider address</Text>
+    <SafeAreaView style={GlobalStyle.container}>
+      <Subheading>Data provider address</Subheading>
       <TextInput
         label="Server address"
         value={address}
         onChangeText={setAddress}
         type='outlined'
+        disabled={loggedUser != null}
       />
       <Button
         mode='contained'
@@ -41,6 +59,16 @@ export default function SettingsScreen(props) {
       >
         Save  
       </Button>
+     
     </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  removeBtn: {
+    position: 'absolute',
+    bottom:5,
+    alignSelf: 'center',
+    backgroundColor: 'red'
+  }
+})

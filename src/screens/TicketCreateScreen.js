@@ -14,7 +14,7 @@ import DocumentPicker, {
     types,
   } from 'react-native-document-picker'
 import {useSelector, useDispatch} from 'react-redux';
-import { postFile, postTickets } from '../api/apiCalls';
+import { postFile, postTickets, getTicketTypes, getFileTypes } from '../api/apiCalls';
 import { SettingsReducer } from '../redux/store/reducers';
 import {passwordValidator, textValidator } from '../validators';
 
@@ -22,9 +22,10 @@ export default function TicketCreateScreen(props) {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState(null);
     const [description, setDescription] = useState('');
-    const [categories, setCategories] = useState( [{id:1, name:'Technical'}]);
+    const [categories, setCategories] = useState([]);
     const [callRequested, setCallRequested] = useState(false);
     const [file, setFile] = useState(null);
+    const [fileformats, setFileformats] = useState([]);
     const serverAddress =  useSelector(state => state.SettingsReducer.address);
     const userData =  useSelector(state => state.AuthReducer.userData);   
     const [visible, setVisible] = useState(false);
@@ -42,13 +43,45 @@ export default function TicketCreateScreen(props) {
         }
     }
 
+    const loadCategories = async () => {
+        const result  = await getTicketTypes(serverAddress);
+        if(result === null) return;
+        switch (result.status) {
+            case 401:
+                dispatch(Logout());
+                break;
+            case 404:
+                setVisible(true);
+                break;
+            case 200:
+                setCategories(result.body.items);
+                break;
+            default:
+        };
+
+        const filetypes = await getFileTypes(serverAddress);
+        if(filetypes === null) return;
+        switch (result.status) {
+            case 401:
+                dispatch(Logout());
+                break;
+            case 404:
+                setVisible(true);
+                break;
+            case 200:
+                setFileformats(filetypes.body.items);
+                break;
+            default:
+        };
+    }
+
     useEffect(() => {
     console.log(JSON.stringify(file, null, 2))
     }, [file])          
     
     useEffect(() => {
         //load categories
-
+        loadCategories();
     }, []); 
 
     
@@ -76,6 +109,7 @@ export default function TicketCreateScreen(props) {
         let fileUpload = null;
         if(file !== null) {
             const uploadResponse = await postFile(serverAddress, file[0]);
+            if(uploadResponse == null) return;
             switch(uploadResponse.status){
                 case 401:
                     dispatch(Logout());
@@ -106,10 +140,8 @@ export default function TicketCreateScreen(props) {
 
         postTickets(serverAddress, data).then(response => {
             console.log(response);
-            props.navigation.goBack();
+    
             props.route.params.onCreateTicket({created: true});
-            return;
-            
             switch(response.status){
                 case 201:
                     console.log(response);
@@ -117,7 +149,11 @@ export default function TicketCreateScreen(props) {
                     props.route.params.onCreateTicket({created: true});
                     break;
                 case 401:
-                    //Logout 
+                    dispatch(Logout());
+                    break;
+                case 404:
+                    setVisible(true);
+                    break;
                 default: 
             }
         }).catch(err => {
@@ -152,7 +188,7 @@ export default function TicketCreateScreen(props) {
                     onChange={(value) => {setCategory(value.name)}}
                 />
                 {
-                    (category != null) &&
+                    (category == null) &&
                     <HelperText type='error' visible={true}>Please select category</HelperText>
                 }
                 <TextInput
@@ -198,6 +234,7 @@ export default function TicketCreateScreen(props) {
                 <Text>Call requested</Text>
                 </View>
             </View>
+            <HelperText type='info' visible={true}>Supported file formats: {fileformats.map(e => "."+e.name).join(", ")}</HelperText>
             {file && <Chip onClose={() => {setFile(null)}} onPress={() => {setFile(null)}}>{file[0].name}</Chip>}
             </ScrollView>
             <Button
@@ -205,14 +242,14 @@ export default function TicketCreateScreen(props) {
                 mode='contained'
                 onPress={submitTicket}
             >
-                CREATE
+                CREATE TICKET
             </Button>
             <Snackbar
                     visible={visible}
                     onDismiss={() => setVisible(false)}
                     duration={3000}
                     action={{
-                    label: 'Undo',
+                    label: 'Close',
                     onPress: () => {
                         setVisible(false);
                     },

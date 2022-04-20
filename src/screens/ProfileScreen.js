@@ -23,6 +23,7 @@ export default function ProfileScreen({route, navigation}) {
 
     const fetchTickets = async () => {
         const response = await getTickets(serverAddress, {user_id: route.params.user_id});
+        if(response == null) return;
         switch(response.status) {
             case 401:
                 dispatch(Logout());
@@ -41,6 +42,7 @@ export default function ProfileScreen({route, navigation}) {
 
     const fetchProfile = async () => {
         const response = await getUsers(serverAddress, {id: route.params.user_id});
+        if(response == null) return;
         switch (response.status) {
             case 200:
                 setUserData(response.body);
@@ -58,8 +60,19 @@ export default function ProfileScreen({route, navigation}) {
 
     useEffect(() => {
         fetchProfile();
+        
+    }, [route.params.user_id]);
+
+    useEffect(() => {
         fetchTickets();
-    }, []);
+        const willFocusSubscription = navigation.addListener('focus', () => {
+            console.log("focus");
+            fetchTickets();
+      });
+  
+      return willFocusSubscription;
+  }, []);
+  
 
     return (
         <SafeAreaView style={GlobalStyle.container}>
@@ -89,10 +102,10 @@ export default function ProfileScreen({route, navigation}) {
                         <View>
                             <Headline>{userData.full_name}</Headline>
                             {
-                               (true || (loggedUser.id != userData.id)) &&
+                               ((loggedUser.id != userData.id)) &&
                                 <Button 
                                     style={styles.callBtn} 
-                                    onPress={() => {route.params.onCall('meno')}}
+                                    onPress={() => {route.params.onCall(userData.username)}}
                                     mode='contained'>
                                         Call
                                     </Button>
@@ -129,7 +142,7 @@ export default function ProfileScreen({route, navigation}) {
             <View style={{flex:1}}>
                 <FlatList
                     data={filter == 'resolved' ? resolved : pending}
-                    renderItem={({item}) =>{console.log(pending); return <TicketCard ticketData={item}/>}}
+                    renderItem={({item}) => <TicketCard onClick={(ticket) => {navigation.navigate("Ticket Detail", {ticket: ticket})}} onUpdate={ fetchTickets} item={item} />}
                 />
             </View>
             </View>

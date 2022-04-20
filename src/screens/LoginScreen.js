@@ -3,7 +3,7 @@ import { StyleSheet, View, Image, TextInput, SafeAreaView } from "react-native";
 import { Button, Snackbar } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsers, userLogin } from "../api/apiCalls"
-import { Init, Login } from "../redux/store/actions"
+import { Init, Login,Logout } from "../redux/store/actions"
 
 
 export function LoginScreen({navigation}) {
@@ -15,19 +15,44 @@ export function LoginScreen({navigation}) {
   const serverAddress = useSelector(state => state.SettingsReducer.address);
   
   useEffect(() => {
-    //dispatch(Init());
+    try{
+      dispatch(Init());
+      //dispatch(Logout());
+    } catch {
+      console.log("eerr thrown");
+      dispatch(Logout());
+    }
   }, [])
 
   const onLoginPressed = async () => {
-
+    try{
     userLogin(serverAddress, username, password).then(response => {
       //console.log("\n\n\n" + JSON.stringify(response.body, null, 2) + "\n\n\n");
-      if(response.status === 200) {
-
-        dispatch(Login(response.body, password));
-        getUsers(serverAddress);
+      if(response == null) {return;}
+      switch(response.status) {
+        case 200:
+          console.log(response.body);
+          console.log("loging in type " + response.body.uer_type__name)
+          dispatch(Login(response.body, password));
+          getUsers(serverAddress);
+          break;
+        case 404:
+          setMessage("User does not exist");
+          setShowWarning(true);
+          break;
+        case 401:
+          setMessage("Invalid credentials");
+          setShowWarning(true);
+          break;
+        default:
+          setMessage("Some error occured");
+          setShowWarning(true);
       }
+ 
     });
+  } catch (err) {
+    dispatch(Logout());
+  }
 }
 
   return (
