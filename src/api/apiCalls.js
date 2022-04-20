@@ -697,4 +697,4 @@ const getUserTypes = async (address) => {
 }
 
 
-export { constructParams ,userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };
+export {getTokens, constructParams ,userLogin, getFileTypes, getTicketTypes, getUserTypes, getUsers, getTickets, putUsers, putTickets, postUsers, postTickets, deleteUsers, deleteTickets, getFile, postFile };

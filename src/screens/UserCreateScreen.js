@@ -51,13 +51,13 @@ export default function UserCreateScreen({navigation}) {
     const submitUser = async () => {
         let fileUpload = null;
         if(file !== null) {
-            const uploadResponse = await postFile(serverAddress, userData.username, userData.password, file[0]);
-            console.log("Upload response"+uploadResponse);
-            if(uploadResponse === null) {
+            const uploadResponse = await postFile(serverAddress, file[0]);
+            console.log("Upload response"+Object.keys(uploadResponse));
+            if(uploadResponse === null || uploadResponse == undefined) {
                 console.error("could not post file");
                 return;
             } else {   
-                fileUpload = uploadResponse.id;
+                fileUpload = uploadResponse.body.id;
             }
         }
        
@@ -105,7 +105,7 @@ export default function UserCreateScreen({navigation}) {
 
     
     const fetchData = async () => {
-        const result = await getUserTypes(serverAddress, userData.username, userData.password);
+        const result = await getUserTypes(serverAddress);
         console.log(result.status);
         switch(result.status) {
             case 200:

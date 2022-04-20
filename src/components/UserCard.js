@@ -7,6 +7,8 @@ export function UserCard({userData, onPress}) {
     
     //console.log("tick tick" + userData);
     //const [profileImage, setProfileImage] = useState(null);
+    
+
 
     return (
         <Card onPress={() => onPress(userData)}>
@@ -14,7 +16,7 @@ export function UserCard({userData, onPress}) {
                 <View style={[styles.container]}>
                     <View style={[styles.row]}>
                         {
-                            userData.profile_img_file ?
+                            (userData.profile_img_file && userData.profileImage) ?
                             <Avatar.Image style={GlobalStyle.profileImage} size={120} source={{uri: userData.profileImage}} />
                             :
                             <Avatar.Text style={GlobalStyle.profileImage} size={120} label={userData.full_name.split(' ').map(w => w[0]).join('')} />

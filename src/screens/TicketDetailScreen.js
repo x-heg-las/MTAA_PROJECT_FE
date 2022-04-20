@@ -3,7 +3,9 @@ import {View, ScrollView, StyleSheet, SafeAreaView} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import {useSelector} from 'react-redux';
 import {AuthReducer, SettingsReducer} from '../redux/store/reducers';
-import {getUsers, putTickets} from '../api/apiCalls';
+import {getUsers, putTickets, constructParams, getTokens} from '../api/apiCalls';
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export  default function TicketDetailScreen({route, navigation}) {;
     const [owner, setOwner]  = useState({});
@@ -96,6 +98,17 @@ export  default function TicketDetailScreen({route, navigation}) {;
                             submitChanges(route.params.ticket.id, description, answer)
                         }}
                     >Submit</Button>
+                }
+                {
+                    (route.params.ticket.file || true) &&
+                    <Button onPress={async() =>{
+                        await getTokens(serverAddress, loggedUser.username, loggedUser.password);
+                        const token = await AsyncStorage.getItem('accessToken');
+                    }
+                        
+                    }>
+                        Download 
+                    </Button>
                 }
             </View>
             </ScrollView>

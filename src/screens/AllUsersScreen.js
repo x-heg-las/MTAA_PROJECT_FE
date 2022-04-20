@@ -24,18 +24,20 @@ export default function AllUsersScreen({navigation}) {
 
   const onChangeSearch = (query) => {
       setSearchQuery(query);
-      getUsers(serverAddress, {query: query}).then(resp => {
+      getUsers(serverAddress, {query: query}).then(async resp => {
           for (const item of resp.body.items) {
               console.log(item.profile_img_file);
-              getFile(serverAddress, {id: item.profile_img_file}).then(imgRes => {
+              await getFile(serverAddress, {id: item.profile_img_file}).then(imgRes => {
                 imgRes.body.then(imgData => {
                     item.profileImage = imgData;
-                    setResData(resp.body.items);
+                    
                 });
               });
           }
           if (resp.body.items.length === 0) {
             setResData([]);
+          } else {
+            setResData(resp.body.items);
           }
       });
   }
