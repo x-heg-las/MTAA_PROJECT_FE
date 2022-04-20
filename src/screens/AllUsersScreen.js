@@ -25,6 +25,9 @@ export default function AllUsersScreen({navigation}) {
   const onChangeSearch = (query) => {
       setSearchQuery(query);
       getUsers(serverAddress, {query: query}).then(async resp => {
+          if (resp.status === 401) {
+            dispatch(Logout());
+          }
           for (const item of resp.body.items) {
               console.log(item.profile_img_file);
               if(item.profile_img_file == null) {continue;}
